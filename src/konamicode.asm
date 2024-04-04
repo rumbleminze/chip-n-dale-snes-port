@@ -1,11 +1,11 @@
 
 ; where in the code the user correctly is
-CODE_INDEX  = $0810
-JOYPAD1     = $0812
-JOYTRIGGER1 = $0814
-JOYHELD1    = $0816
-buttons     = $0818
-KONAMI_CODE_ENABLED = $081A
+CODE_INDEX  = $0820
+JOYPAD1     = $0822
+JOYTRIGGER1 = $0824
+JOYHELD1    = $0826
+buttons     = $0828
+KONAMI_CODE_ENABLED = $082A
 
 UP_BUTTON       = $08
 DOWN_BUTTON     = $04

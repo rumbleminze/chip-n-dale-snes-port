@@ -1,7 +1,7 @@
 .segment "HEADER"
       
-.byte "RYGAR SNES V1.1      " ; ROM name, must be 21 chars
-
+.byte "CHIP N DALE SNES V0.1" ; ROM name, must be 21 chars
+       
                 
 .segment "ROMSPEC"
 .byte $31   ; Map Mode: 3.58MHz HiROM

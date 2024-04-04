@@ -1,236 +1,179 @@
-; $0320,X has VMADDH
-; $0320,X+1 has VMADDL
-; $08 has size
-; $0320,$0F is start of data
-rygar_vertical_scroll_atrribute_handle:
-  ; 
+; ATTR_PARAM_HB - has HB of VM start
+; ATTR_PARAM_LB - has LB of VM start
+; ($00), Y has the data.
 
-  LDA $70
+; this needs to be 2 bytes on the ZP that ideally isn't used.
+.define ZP_ADDR_USAGE $50
+
+c11e_replacement:
+  STZ ATTR_VM_DATA_MAYBE_ATTR
+  
+  STA VMADDH ; PpuAddr_2006
+  STA ATTR_NES_VM_ADDR_HB
+  AND #$03
+  CMP #$03
+  BNE :+
+  INC ATTR_VM_DATA_MAYBE_ATTR
+:   
+  LDA $0361,X  
+  STA VMADDL ; PpuAddr_2006
+  STA ATTR_NES_VM_ADDR_LB
+  CMP #$BF
+  BCC :+
+  INC ATTR_VM_DATA_MAYBE_ATTR   
+: LDY $0362,X
+  STY ATTR_NES_VM_COUNT
+  INC ATTR_NES_VM_COUNT
+  STY ATTR_NES_SIZE
+
+  LDA ATTR_VM_DATA_MAYBE_ATTR
+  CMP #$02
+  BNE :+
+  JSR cnd_c11e_attribute_handle
+  RTL
+  ; original code, kept for completeness
+: LDA $0363,X
+  STA VMDATAL ; PpuData_2007
+  INX
+  DEY
+  BPL :-
+
+  RTL
+
+cnd_c11e_attribute_handle:
+  PHB
   PHA
-  LDA $71
+  PHY
+
+  LDY #$00
+  : 
+  LDA $0363,X
+  STA ATTR_NES_VM_ATTR_START, Y ; STA VMDATAL ; PpuData_2007
+  INX
+  INY
+  DEC ATTR_NES_SIZE
+  BPL :-
+  LDA #$00
+  STA ATTR_NES_VM_ATTR_START, Y
+  INC A
+  STA ATTR_NES_HAS_VALUES
+
+  PHX
+  JSL convert_nes_attributes_and_immediately_dma_them
+  ; JSL cnd_scroll_no_immidiate
+  JSL reset_vmain_to_stored_state 
+  PLX
+  PLY
+  PLA
+  PLB
+
+  RTS
+
+update_indirect_pointer:
+  INY
+  BNE :+
+  INC $01
+: RTS
+
+cnd_scroll_atrribute_handle:
+  
+  JSL cnd_scroll_no_immidiate
+  PHA
+  PHX
+  PHY
+  LDA ATTR_PARAM_IMMEDIATE
+  BEQ :+
+    PHB
+    JSL convert_nes_attributes_and_immediately_dma_them
+    JSL reset_vmain_to_stored_state
+    PLB
+: 
+  PLY
+  PLX
+  PLA
+  RTL
+
+cnd_scroll_no_immidiate:
+  PHA
+  LDA ZP_ADDR_USAGE
+  PHA
+  LDA ZP_ADDR_USAGE + 1
   PHA
   
   LDA ATTR_NES_HAS_VALUES
   BNE use_2nd_page
   LDA #.lobyte(ATTR_NES_HAS_VALUES)
-  STA $70
+  STA ZP_ADDR_USAGE
   LDA #.hibyte(ATTR_NES_HAS_VALUES)
-  STA $71
+  STA ZP_ADDR_USAGE + 1
   BRA start_handling
 use_2nd_page:
   LDA #.lobyte(ATTR2_NES_HAS_VALUES)
-  STA $70
+  STA ZP_ADDR_USAGE
   LDA #.hibyte(ATTR2_NES_HAS_VALUES)
-  STA $71
+  STA ZP_ADDR_USAGE + 1
 
 start_handling:
-  INC $70
-  LDA $0320,X
-  STA ($70) ; ATTR_NES_VM_ADDR_HB
+  INC ZP_ADDR_USAGE
+  LDA ATTR_PARAM_HB
+  STA (ZP_ADDR_USAGE) ; ATTR_NES_VM_ADDR_HB
 
-  INX
-  LDA $0320,X
-  INC $70
-  STA ($70) ; ATTR_NES_VM_ADDR_LB
+  INC ZP_ADDR_USAGE
+  LDA ATTR_PARAM_LB
+  STA (ZP_ADDR_USAGE) ; ATTR_NES_VM_ADDR_LB
 
-  LDA $08
-  INC $70
-  STA ($70) ; ATTR_NES_COUNT
+  LDA ATTR_PARAM_SIZE
+  INC A
+  INC ZP_ADDR_USAGE
+  STA (ZP_ADDR_USAGE) ; ATTR_NES_COUNT
 
-  INX
-  STX $0E
+  ; start reading attribute data
+  ; this is indirectly pointed to via $00
+  INC ZP_ADDR_USAGE ; now pointing to $ATTR_START
+  LDX #$00
+
+: LDA ($00), Y
   PHY
-  LDY #$00
-  LDX $0F
-  INC $70 ; now pointing to $ATTR_START
-: LDA $0330,X
-  STA ($70), Y
-  INY
+  TXY
+  STA (ZP_ADDR_USAGE), Y
+  PLY
+  jsr update_indirect_pointer
   INX
-  DEC $08
-  BNE :-
+  DEC ATTR_PARAM_SIZE
+  BPL :-
 
   lda #$00
-  STA ($70), Y
-  
-  PLY
-  STX $0F
-
-  DEC $70
-  DEC $70
-  DEC $70
-  DEC $70
-  LDA #$01
-  STA ($70) ; ATTR_NES_HAS_VALUES
-  
-  ; JSL convert_nes_attributes_and_immediately_dma_them
-  PLA 
-  STA $71
-  PLA 
-  STA $70
-
-  LDA #$00
-  RTL
-
-rygar_scroll_atrribute_handle_8d67:
-
-  LDA $70
-  PHA
-  LDA $71
-  PHA
-  
-  LDA ATTR_NES_HAS_VALUES
-  BNE use_2nd_page_a
-  LDA #.lobyte(ATTR_NES_HAS_VALUES)
-  STA $70
-  LDA #.hibyte(ATTR_NES_HAS_VALUES)
-  STA $71
-  BRA start_handling_a
-use_2nd_page_a:
-  LDA #.lobyte(ATTR2_NES_HAS_VALUES)
-  STA $70
-  LDA #.hibyte(ATTR2_NES_HAS_VALUES)
-  STA $71
-start_handling_a:
-  ; 
-  INC $70
-  LDA $0320,X
-  STA ($70) ; ATTR_NES_VM_ADDR_HB
-
-  INX
-  LDA $0320,X
-  INC $70
-  STA ($70) ; ATTR_NES_VM_ADDR_LB
-
-  LDA $08
-  INC $70
-  STA ($70) ; ATTR_NES_COUNT
-
-  INX
-  STX $0E
-
   PHY
-  LDY #$00
-  LDX $0F
-  INC $70 ; now pointing to $ATTR_START
-: LDA $0330,X
-  STA ($70), Y
-  INY
-  DEC $08
-  BNE :-
-
-  lda #$00
-  STA ($70), Y
-
+  TXY
+  STA (ZP_ADDR_USAGE), Y
   PLY
-  DEC $70
-  DEC $70
-  DEC $70
-  DEC $70
+  
+  DEC ZP_ADDR_USAGE
+  DEC ZP_ADDR_USAGE
+  DEC ZP_ADDR_USAGE
+  DEC ZP_ADDR_USAGE
   LDA #$01
-  STA ($70) ; ATTR_NES_HAS_VALUES
-  ; JSL convert_nes_attributes_and_immediately_dma_them
+  STA (ZP_ADDR_USAGE) ; ATTR_NES_HAS_VALUES
+  
   PLA 
-  STA $71
+  STA ZP_ADDR_USAGE + 1
   PLA 
-  STA $70
-  INC $0F
+  STA ZP_ADDR_USAGE
+  PLA
   RTL
 
-rygar_attribute_scroll_write:
-  LDA COL_ATTR_HAS_VALUES
-  BEQ :+
-  jmp rygar_attribute_scroll_write_col2
-: LDA #$08
-  STA COL_ATTR_VM_COUNT
-  LDA $0320, X
-  STA COL_ATTR_VM_HB
-  INX
-  LDA $0320, X  
-  PHA
-  AND #$0F
-  ORA #$C0
-  STA COL_ATTR_VM_LB
-  ; prep for next row
-  ADC #$08
-  ORA #$C0
-  STA $0320, X
-  PLA
-  DEX 
-  PHX
-  LDX #$00
-  SEC
-  SBC #$C0
-  LSR
-  LSR
-  LSR
-  AND #$07
-  TAX
-: LDA $0330, Y
-  STA COL_ATTR_VM_START, X
-  INY
-  INX
-  CPX #$08
-  BNE :+
-  LDA #$00
-  TAX
-: DEC $08
-  BNE :--
-  INC COL_ATTR_HAS_VALUES
-  ; jsl convert_nes_attributes_and_immediately_dma_them
-  PLX
-  RTL
-
-rygar_attribute_scroll_write_col2:
-  LDA #$08
-  STA COL2_ATTR_VM_COUNT
-  LDA $0320, X
-  STA COL2_ATTR_VM_HB
-  INX
-  LDA $0320, X  
-  PHA
-  AND #$0F
-  ORA #$C0
-  STA COL2_ATTR_VM_LB
-  ; prep for next row
-  ADC #$08
-  ORA #$C0
-  STA $0320, X
-  PLA
-  DEX 
-  PHX
-  LDX #$00
-  SEC
-  SBC #$C0
-  LSR
-  LSR
-  LSR
-  AND #$07
-  TAX
-: LDA $0330, Y
-  STA COL2_ATTR_VM_START, X
-  INY
-  INX
-  CPX #$08
-  BNE :+
-  LDA #$00
-  TAX
-: DEC $08
-  BNE :--
-  INC COL2_ATTR_HAS_VALUES
-  ; jsl convert_nes_attributes_and_immediately_dma_them
-  PLX
-  RTL
 
 
 check_and_copy_attribute_buffer:
   LDA ATTRIBUTE_DMA
   BEQ :+
   JSR copy_prepped_attributes_to_vram
-: LDA ATTRIBUTE2_DMA
-  BEQ :+
-  JSR copy_prepped_attributes2_to_vram
-: LDA COLUMN_1_DMA
+: 
+;   LDA ATTRIBUTE2_DMA
+;   BEQ :+
+;   JSR copy_prepped_attributes2_to_vram
+; : 
+  LDA COLUMN_1_DMA
   BEQ :+
   JSR dma_column_attributes
 : LDA COLUMN_2_DMA
@@ -238,9 +181,67 @@ check_and_copy_attribute_buffer:
   JSR dma_column2_attributes
 : RTS
 
+
+copy_single_prepped_attribute:
+  LDA ZP_ADDR_USAGE
+  PHA
+  LDA ZP_ADDR_USAGE + 1
+  PHA
+
+  LDA #$80
+  STA VMAIN
+
+  LDA ATTR_DMA_VMADDH
+  STA VMADDH
+  LDA ATTR_DMA_VMADDL
+  STA VMDATAL
+
+  LDA ATTR_DMA_SRC_LB
+  STA ZP_ADDR_USAGE
+  LDA ATTR_DMA_SRC_HB
+  STA ZP_ADDR_USAGE + 1
+
+  LDX #$04
+: LDY #$00
+: LDA (ZP_ADDR_USAGE), y
+  STA VMDATAH
+  INY
+  CMP #$04
+  BNE :-
+
+  LDA ZP_ADDR_USAGE
+  CLC
+  ADC #$20
+  BCC :+
+    INC ZP_ADDR_USAGE + 1
+    CLC
+: STA ZP_ADDR_USAGE
+
+  DEX
+  BNE :---
+
+  jsl reset_vmain_to_stored_state
+
+  PLA
+  STA ZP_ADDR_USAGE + 1
+  PLA
+  STA ZP_ADDR_USAGE
+
+  RTS
+
 copy_prepped_attributes_to_vram:
   STZ ATTRIBUTE_DMA
-  LDA #$80
+  ; check for a single value
+  LDA ATTR_DMA_SIZE_HB
+  BNE :+
+  LDA ATTR_DMA_SIZE_LB
+  BNE :+
+  RTS
+: CMP #$01
+  BNE :+
+  JMP copy_single_prepped_attribute
+
+: LDA #$80
   STA VMAIN
   STZ DMAP6
   LDA #$19
@@ -379,11 +380,12 @@ check_and_copy_nes_attributes_to_buffer:
   LDA ATTR_NES_HAS_VALUES
   BEQ :+
   JSR convert_attributes_inf
-: LDA ATTR2_NES_HAS_VALUES
-  BEQ early_rts_from_attribute_copy
-  JSR convert_attributes2_inf
+: 
+  ; LDA ATTR2_NES_HAS_VALUES
+  ; BEQ early_rts_from_attribute_copy
+  ; JSR convert_attributes2_inf
 early_rts_from_attribute_copy:
- RTS
+  RTS
   
 convert_attributes_inf:
   PHK

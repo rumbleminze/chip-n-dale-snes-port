@@ -123,8 +123,14 @@ initialize_registers:
   
   JSR clear_zp 
   JSR clear_buffers
-  JSR clearvm
   
+  LDA #$20
+  STA $00
+  JSR clear_bg
+  LDA #$24
+  STA $00
+  JSR clear_bg
+  JSR clearvm
   LDA #$E0
   STA COLDATA
   LDA #$0F
@@ -189,77 +195,82 @@ initialize_registers:
   JSL upload_sound_emulator_to_spc
   ; JSL load_base_tiles
   JSR setup_pause_window 
-  JSR do_intro
+  ; JSR do_intro
   JSR clearvm_to_12
   JSR write_default_palettes
+  JSR write_stack_adjustment_routine_to_ram
   LDA #$A1
   PHA
   PLB 
-  JML $A1C000
+  JML $A1FFE0
 
 
   snes_nmi:
-    LDA RDNMI
+    LDA RDNMI 
     JSL update_values_for_ppu_mask
     JSL infidelitys_scroll_handling
-    ; JSL update_screen_scroll
+    JSL update_screen_scroll
     JSL setup_hdma    
 
-  LDA #$7E
-  STA A1B3
-  LDA #$09
-  STA A1T3H
-  STZ A1T3L
-  
-  LDA #<(BG1HOFS)
-  STA BBAD3
-  LDA #$03
-  STA DMAP3
+    LDA #$7E
+    STA A1B3
+    LDA #$09
+    STA A1T3H
+    STZ A1T3L
+    
+    LDA #<(BG1HOFS)
+    STA BBAD3
+    LDA #$03
+    STA DMAP3
 
-  LDA #%00001000
-  STA HDMAEN
+    LDA #%00001000
+    STA HDMAEN
 
-  .if ENABLE_MSU > 0
-    ; JSL msu_nmi_check
-    .byte $22, .lobyte(msu_nmi_check), .hibyte(msu_nmi_check), $e8
-  .endif 
+    .if ENABLE_MSU > 0
+      ; JSL msu_nmi_check
+      .byte $22, .lobyte(msu_nmi_check), .hibyte(msu_nmi_check), $e8
+    .endif 
 
-  JSR dma_oam_table
-  ; JSR disable_attribute_buffer_copy
-  
-  LDA ATTR_WORK_BYTE_0
-  PHA
-  LDA ATTR_WORK_BYTE_1
-  PHA
-  LDA ATTR_WORK_BYTE_2
-  PHA
-  LDA ATTR_WORK_BYTE_3 
-  PHA
-  JSR check_and_copy_attribute_buffer
-  JSR check_and_copy_column_attributes_to_buffer
-  ; JSR write_one_off_vrams
-  JSR check_and_copy_nes_attributes_to_buffer
-  pla
-  sta ATTR_WORK_BYTE_3
-  pla
-  sta ATTR_WORK_BYTE_2
-  pla
-  sta ATTR_WORK_BYTE_1
-  pla 
-  sta ATTR_WORK_BYTE_0
-  RTL
+    JSR dma_oam_table
+    ; JSR disable_attribute_buffer_copy
+    
+    ; LDA ATTR_WORK_BYTE_0
+    ; PHA
+    ; LDA ATTR_WORK_BYTE_1
+    ; PHA
+    ; LDA ATTR_WORK_BYTE_2
+    ; PHA
+    ; LDA ATTR_WORK_BYTE_3 
+    ; PHA
+    ; JSR check_and_copy_attribute_buffer
+    ; JSR check_and_copy_column_attributes_to_buffer
+    ; JSR write_one_off_vrams
+    ; JSR check_and_copy_nes_attributes_to_buffer
+    ; pla
+    ; sta ATTR_WORK_BYTE_3
+    ; pla
+    ; sta ATTR_WORK_BYTE_2
+    ; pla
+    ; sta ATTR_WORK_BYTE_1
+    ; pla 
+    ; sta ATTR_WORK_BYTE_0
+    RTL
 
-clearvm:
+clear_bg_jsl:
+  jsr clear_bg
+  rtl
+clear_bg:
+
   LDA #$80
   STA VMAIN
 
   ; fixed A value, increment B
+  
   LDA #$09
   sta DMAP0
-
-  LDA #$00
+  
+  LDA $00
   STA VMADDH
-  LDA #$00
   STZ VMADDL
 
   LDA #$18
@@ -273,13 +284,56 @@ clearvm:
   LDA #<dma_values
   STA A1T0L
 
-  LDA #$00
+  LDA #$08
   STA DAS0H  
   STZ DAS0L
 
   LDA #$01
   STA MDMAEN
 
+  LDA VMAIN_STATE
+  STA VMAIN
+  RTS
+
+clearvm_jsl:
+  jsr clearvm
+  rtl
+clearvm:
+  LDA #$80
+  STA VMAIN
+
+  ; fixed A value, increment B
+  setAXY16
+
+  LDA #$0009
+  sta DMAP0
+
+  ; LDA #$00
+  ; STA VMADDH
+  LDA #$0000
+  STZ VMADDL
+
+  LDA #$18
+  STA BBAD0
+
+  LDA #$A0
+  STA A1B0
+
+  setAXY8
+  LDA #>dma_values
+  STA A1T0H
+  LDA #<dma_values
+  STA A1T0L
+  setAXY16
+
+  ; LDA #$0000
+  ; STA DAS0H  
+  STZ DAS0L
+
+  LDA #$0001
+  STA MDMAEN
+
+  setAXY8
   LDA VMAIN_STATE
   STA VMAIN
   RTS
@@ -325,8 +379,10 @@ clear_zp:
 clear_buffers:
   LDA #$00
   LDY #$00
+  LDX #$FF
 
-: STA $0800, Y
+: LDA #$00
+  STA $0800, Y
   STA $0900, Y
   STA $0A00, Y
   STA $0B00, Y
@@ -352,6 +408,10 @@ clear_buffers:
   STA $1D00, Y
   STA $1E00, Y
   STA $1F00, Y
+
+  LDA #$FF
+  STA $6500, y
+  STA $6600, y
   DEY
   BNE :-
   RTS
@@ -369,7 +429,7 @@ dma_values:
   .include "hardware-status-switches.asm"
   .include "scrolling.asm"
   .include "attributes.asm"
-  .include "attributes2.asm"
+  ; .include "attributes2.asm"
   .include "hdma_scroll_lookups.asm"
   .include "2a03_conversion.asm"
   .include "windows.asm"

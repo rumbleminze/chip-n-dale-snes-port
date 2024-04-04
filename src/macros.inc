@@ -30,3 +30,12 @@
 .endif
 
 .endmacro
+
+.macro brks num
+
+.if num > 0
+    BRK
+    brks num -1
+.endif
+
+.endmacro

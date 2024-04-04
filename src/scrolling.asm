@@ -28,27 +28,38 @@ no_scroll_screen_enable:
   STZ VOFS_LB
   STZ VOFS_HB
   INC STORED_OFFSETS_SET
-
-  LDA PPU_CONTROL_STATE               
+   
+  lda PPU_CONTROL_STATE
   AND #$FC                 
   STA PPU_CONTROL_STATE
   RTL 
 
 update_screen_scroll:
-  LDA HOFS_HB
-  STA BG1HOFS
+  LDA BG_SCREEN_INDEX
+  AND #$01
+  BEQ :+
+  LDA #$01
+  STA HOFS_HB
+
+: STA BG1HOFS
   LDA HOFS_LB
   STA BG1HOFS
 
-  LDA VOFS_HB
-  STA BG1VOFS
+  LDA BG_SCREEN_INDEX
+  AND #$02
+  BEQ :+
+  LDA #$02
+  STA VOFS_HB
+: STA BG1VOFS
   LDA VOFS_LB
   STA BG1VOFS
 
   RTL
 
 infidelitys_scroll_handling:
-  LDA PPU_CONTROL_STATE
+  LDA BG_SCREEN_INDEX
+  AND #$01
+  ORA PPU_CONTROL_STATE
   PHA 
   AND #$80
   BNE :+
@@ -109,11 +120,16 @@ setup_hdma:
   STA $0901
   STA $0906
   STA $090B
-  LDA PPU_CONTROL_STATE
+  lda BG_SCREEN_INDEX
+  and #$01
+  ora PPU_CONTROL_STATE
   STA $0902
   STA $0907
   STA $090C
+  lda BG_SCREEN_INDEX
+  and #$01
   LDX PPU_CONTROL_STATE
+  
   LDA $A0A610,X
   STA $0904
   STA $0909
@@ -151,18 +167,18 @@ title_screen_rollover:
   RTL
 
 flip_bg1_bit:
-  LDA PPU_CONTROL_STATE
+  LDA BG_SCREEN_INDEX
   EOR #$02  
-  STA PPU_CONTROL_STATE
+  STA BG_SCREEN_INDEX
   RTS
 
 
 handle_horizontal_scroll_wrap:
   INC $1B
 
-  LDA PPU_CONTROL_STATE
+  LDA BG_SCREEN_INDEX
   EOR #$01
-  STA PPU_CONTROL_STATE
+  STA BG_SCREEN_INDEX
 
   LDA $5C
   ORA #$80

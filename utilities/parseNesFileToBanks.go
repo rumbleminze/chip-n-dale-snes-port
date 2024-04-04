@@ -72,7 +72,7 @@ func main() {
 		}
 		bankFile.WriteString(fmt.Sprintf(
 			".segment \"PRGA%dC\"\nfixeda%d:\n.include \"bank7.asm\"\nfixeda%d_end:",
-			i, i, i,
+			i+1, i+1, i+1,
 		))
 	}
 	// CHR banks
@@ -87,56 +87,56 @@ func main() {
 				tileset++
 			}
 
-			if i < 14 || (byteIndex < 0x2000 && i == 14) {
-				// converts these to SNES expected format
-				bankFile.WriteString(
-					fmt.Sprintf(
-						".byte $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X,"+
-							" $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X\n",
-						banks[i][byteIndex],
-						banks[i][byteIndex+8],
-						banks[i][byteIndex+1],
-						banks[i][byteIndex+1+8],
-						banks[i][byteIndex+2],
-						banks[i][byteIndex+2+8],
-						banks[i][byteIndex+3],
-						banks[i][byteIndex+3+8],
-						banks[i][byteIndex+4],
-						banks[i][byteIndex+4+8],
-						banks[i][byteIndex+5],
-						banks[i][byteIndex+5+8],
-						banks[i][byteIndex+6],
-						banks[i][byteIndex+6+8],
-						banks[i][byteIndex+7],
-						banks[i][byteIndex+7+8],
-					),
-				)
-				bankFile.WriteString(".byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00\n")
-			} else {
-				// these are data banks that need to be formatted differently
-				bankFile.WriteString(
-					fmt.Sprintf(
-						".byte $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00\n"+
-							".byte $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00\n",
-						banks[i][byteIndex],
-						banks[i][byteIndex+1],
-						banks[i][byteIndex+2],
-						banks[i][byteIndex+3],
-						banks[i][byteIndex+4],
-						banks[i][byteIndex+5],
-						banks[i][byteIndex+6],
-						banks[i][byteIndex+7],
-						banks[i][byteIndex+8],
-						banks[i][byteIndex+9],
-						banks[i][byteIndex+10],
-						banks[i][byteIndex+11],
-						banks[i][byteIndex+12],
-						banks[i][byteIndex+13],
-						banks[i][byteIndex+14],
-						banks[i][byteIndex+15],
-					),
-				)
-			}
+			// if i < 14 || (byteIndex < 0x2000 && i == 14) {
+			// converts these to SNES expected format
+			bankFile.WriteString(
+				fmt.Sprintf(
+					".byte $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X,"+
+						" $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X\n",
+					banks[i][byteIndex],
+					banks[i][byteIndex+8],
+					banks[i][byteIndex+1],
+					banks[i][byteIndex+1+8],
+					banks[i][byteIndex+2],
+					banks[i][byteIndex+2+8],
+					banks[i][byteIndex+3],
+					banks[i][byteIndex+3+8],
+					banks[i][byteIndex+4],
+					banks[i][byteIndex+4+8],
+					banks[i][byteIndex+5],
+					banks[i][byteIndex+5+8],
+					banks[i][byteIndex+6],
+					banks[i][byteIndex+6+8],
+					banks[i][byteIndex+7],
+					banks[i][byteIndex+7+8],
+				),
+			)
+			bankFile.WriteString(".byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00\n")
+			// } else {
+			// 	// these are data banks that need to be formatted differently
+			// 	bankFile.WriteString(
+			// 		fmt.Sprintf(
+			// 			".byte $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00\n"+
+			// 				".byte $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00, $%02X, $00\n",
+			// 			banks[i][byteIndex],
+			// 			banks[i][byteIndex+1],
+			// 			banks[i][byteIndex+2],
+			// 			banks[i][byteIndex+3],
+			// 			banks[i][byteIndex+4],
+			// 			banks[i][byteIndex+5],
+			// 			banks[i][byteIndex+6],
+			// 			banks[i][byteIndex+7],
+			// 			banks[i][byteIndex+8],
+			// 			banks[i][byteIndex+9],
+			// 			banks[i][byteIndex+10],
+			// 			banks[i][byteIndex+11],
+			// 			banks[i][byteIndex+12],
+			// 			banks[i][byteIndex+13],
+			// 			banks[i][byteIndex+14],
+			// 			banks[i][byteIndex+15],
+			// 		),
+			// 	)
+			// }
 		}
 	}
 

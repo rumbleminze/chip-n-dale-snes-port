@@ -1,3 +1,149 @@
+; 17 bytes of code
+stack_adjustment_routine:
+  setAXY16          ; 2
+  LDX #$01FF        ; 3
+  TXS               ; 1
+  setAXY8           ; 2
+  PHB               ; 1
+  PLA               ; 1
+  STA STACK_ADJUSTMENT_ROUTINE_START + 16         ; 3
+  ; JML back to where we came from
+  .byte $5C, STACK_ADJUSTMENT_RETURN_LO, STACK_ADJUSTMENT_RETURN_HI, $A0
+stack_adjustment_routine_end:
+
+write_stack_adjustment_routine_to_ram:
+  LDY #$00
+: LDA stack_adjustment_routine, y
+  STA STACK_ADJUSTMENT_ROUTINE_START, Y
+  INY
+  CPY #(stack_adjustment_routine_end - stack_adjustment_routine)
+  BNE :-
+  RTS
+
+set_stack_pointer_to_82_x:
+  PLA
+  STA STACK_RETURN_LB
+  PLA
+  STA STACK_RETURN_HB
+  PLA
+  STA STACK_RETURN_DB
+  LDA $82,X
+
+  setAXY16
+  ORA #$0100
+  TAX
+  TXS
+  setAXY8
+
+  LDA STACK_RETURN_DB
+  PHA
+  LDA STACK_RETURN_HB
+  PHA
+  LDA STACK_RETURN_LB
+  PHA
+  RTL
+
+reset_sp_to_01ff:
+  
+  PLA
+  STA STACK_RETURN_LB
+  PLA
+  STA STACK_RETURN_HB
+  PLA
+  STA STACK_RETURN_DB
+
+  setAXY16
+  LDX #$01FF
+  TXS
+  setAXY8
+
+  LDA STACK_RETURN_DB
+  PHA
+  LDA STACK_RETURN_HB
+  PHA
+  LDA STACK_RETURN_LB
+  PHA
+  RTL
+
+set_sp_to_1bf_reload_ppucontrol:
+  PLA
+  STA STACK_RETURN_LB
+  PLA
+  STA STACK_RETURN_HB
+  PLA
+  STA STACK_RETURN_DB   
+
+  setXY16
+  LDX #$01BF
+  TXS
+  setAXY8
+
+  JSL reset_ppu_control_values
+
+  LDA STACK_RETURN_DB
+  PHA
+  LDA STACK_RETURN_HB
+  PHA
+  LDA STACK_RETURN_LB
+  PHA
+  RTL 
+
+update_ppu_control_from_fd_ff:
+  LDA BG_SCREEN_INDEX
+  AND #$01
+  ORA PPU_CONTROL_STATE
+  jsl update_ppu_control_values_from_a
+  RTL
+
+prg_bank_swap_to_a:
+  ; save off xya
+  STX BANK_SWITCH_X
+  STY BANK_SWITCH_Y
+  STA BANK_SWITCH_A
+
+  JSL disable_nmi_no_store
+  ; pull the stack values off
+  PLX
+  PLY
+  PLA
+
+  ; replace the bank with the new one
+  LDA BANK_SWITCH_A
+  AND #$07
+  INC A
+  ORA #$A0
+
+  ; push the values back on the stack
+  PHA
+  PLB
+  PHA
+  PHY
+  PHX
+
+  ; restore xya
+  LDA BANK_SWITCH_A
+  LDY BANK_SWITCH_Y
+  LDX BANK_SWITCH_X
+  
+  JSL reset_nmi_status
+
+  ; rtl, to the new bank
+  RTL
+
+store_90_to_nmi_and_ppu_control_states:
+  LDA #$90
+  STA PPU_CONTROL_STATE
+
+  LDA NMITIMEN_STATE
+  ORA #$80
+  STA NMITIMEN_STATE
+  RTL
+
+reset_ppu_control_values:
+  LDA PPU_CONTROL_STATE
+  JSL update_ppu_control_values_from_a
+  RTL
+
 set_ppu_control_and_mask_to_0:
     LDA VMAIN_STATE
     AND #$FC
@@ -140,13 +286,18 @@ update_vh_write_by_0b:
 
   RTL
 
+update_ppu_mask_to_00_store:
+    LDA #$00
+    STA PPU_MASK_STATE
+    ; turns on BG and sprites
+    JSL update_values_for_ppu_mask
+    RTL
+
 update_ppu_mask_store_to_1e:
     LDA #$1E
     STA PPU_MASK_STATE
     ; turns on BG and sprites
-    LDA #$11
-    STA TM_STATE
-    JSL disable_pause_window
+    JSL update_values_for_ppu_mask
     RTL
 
 update_values_for_ppu_mask:
@@ -177,7 +328,9 @@ update_values_for_ppu_mask:
     BEQ :+
     LDA #$0F
     STA INIDISP
-:   RTL
+    RTL
+:   JSL force_blank_and_store
+    RTL
 
 enable_nmi_and_store:
     ; make sure any NMI flags are clear

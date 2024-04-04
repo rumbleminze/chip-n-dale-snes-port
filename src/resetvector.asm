@@ -10,7 +10,7 @@ LDA #$A0
 PHA
 PLB
 JSL $A08000
-JML $A1FFE8
+JML $A1FFE0
 
 ; below is trash while I tested something
 ; mainloop:
@@ -51,17 +51,18 @@ nmi:
 
     LDA #$C0
     STA BANK_SWITCH_HB
-    LDA #$F6
+    LDA #$00
     STA BANK_SWITCH_LB
 
     
-    PLY
-    PLX
-    PLA
+
 
     JML [BANK_SWITCH_LB]
 return_from_nes_nmi:
-    JSL translate_8_by_16_sprites
+    JSL translate_8by8only_nes_sprites_to_oam
+    PLY
+    PLX
+    PLA
     RTI
 
 _rti:

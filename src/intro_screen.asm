@@ -1,16 +1,18 @@
+INTRO_SCREEN_DONE = $082D
+
 intro_screen_data:
-.byte $48, $20, $e2, $00, $69, $71, $70, $6f, $00                                 ; (c) 1986 
-.byte $db, $cc, $ca, $d4, $d6, $00                           ; TECMO
+.byte $48, $20, $e2, $00, $69, $71, $70, $6f, $00                       ; (c) 1986 
+.byte $db, $cc, $ca, $d4, $d6, $00                                      ; TECMO
 .byte $ff                                                               ; 
 
-.byte $82, $20, $d7, $d9, $cc, $da, $da, $00                            ; press
-.byte $da, $cc, $d3, $cc, $ca, $db, $00, $db, $d6, $ff                  ; select to
-.byte $A2, $20, $da, $de, $d0, $db, $ca, $cf, $00                       ; switch
-.byte $da, $d7, $d9, $d0, $db, $cc, $da, $ff                            ; sprites
+; .byte $82, $20, $d7, $d9, $cc, $da, $da, $00                            ; press
+; .byte $da, $cc, $d3, $cc, $ca, $db, $00, $db, $d6, $ff                  ; select to
+; .byte $A2, $20, $da, $de, $d0, $db, $ca, $cf, $00                       ; switch
+; .byte $da, $d7, $d9, $d0, $db, $cc, $da, $ff                            ; sprites
 
-.byte $ae, $21, $d4, $dc, $da, $d0, $ca, $FF
-.byte $e4, $21, $d6, $d9, $d0, $ce, $d0, $d5, $c8, $d3, $FF
-.byte $f5, $21, $d4, $da, $dc, $69, $FF
+; .byte $ae, $21, $d4, $dc, $da, $d0, $ca, $FF
+; .byte $e4, $21, $d6, $d9, $d0, $ce, $d0, $d5, $c8, $d3, $FF
+; .byte $f5, $21, $d4, $da, $dc, $69, $FF
 
 .byte $A3, $22, $d7, $d6, $d9, $db, $cc, $cb, $00                       ; Ported 
 .byte $c9, $e0, $00                                                     ; by 
@@ -20,14 +22,14 @@ intro_screen_data:
 .byte $00, $23, $6a, $c8, $68, $6b, $00                                 ; 2A03
 .byte $DA, $D6, $DC, $D5, $CB, $00                                      ; SOUND 
 .byte $CC, $D4, $DC, $D3, $C8, $DB, $D6, $D9, $00                       ; EMULATOR
-.byte $C9, $E0, $00                                                ; BY
-.byte $d4, $cc, $d4, $c9, $d3, $cc, $d9, $da, $ff             ; MEMBLERS
+.byte $C9, $E0, $00                                                     ; BY
+.byte $d4, $cc, $d4, $c9, $d3, $cc, $d9, $da, $ff                       ; MEMBLERS
 
-.byte $41, $23, $d4, $da, $dc, $69, $00                 ; MSU1 TRACKS BY
-.byte $db, $d9, $c8, $ca, $d2, $da, $00
-.byte $c9, $e0, $ff                     
-.byte $61, $23, $dd, $ce, $d4, $dc, $da, $d0, $ca, $00 ; VG MUSIC REVISITED
-.byte $d9, $cc, $dd, $d0, $da, $d0, $db, $cc, $cb, $ff
+; .byte $41, $23, $d4, $da, $dc, $69, $00                                 ; MSU1 TRACKS BY
+; .byte $db, $d9, $c8, $ca, $d2, $da, $00
+; .byte $c9, $e0, $ff                     
+; .byte $61, $23, $dd, $ce, $d4, $dc, $da, $d0, $ca, $00                  ; VG MUSIC REVISITED
+; .byte $d9, $cc, $dd, $d0, $da, $d0, $db, $cc, $cb, $ff
             
 
 .byte $78, $23, $d9, $cc, $dd, $00, $69, $81, $69, $ff ; Version (REV0)
@@ -184,7 +186,7 @@ do_intro:
     JSR write_intro_palette
     JSR write_default_palettes
     JSR write_intro_tiles
-    JSR write_intro_sprites
+    ; JSR write_intro_sprites
 
     LDA #$0F
     STA INIDISP
@@ -193,14 +195,13 @@ do_intro:
 
 :
     jsr check_for_code_input
-    jsr check_for_sprite_swap
-    jsr check_for_msu
+    ; jsr check_for_sprite_swap
+    ; jsr check_for_msu
     LDA JOYTRIGGER1
     AND #$10
     CMP #$10
     BNE :-
 
-    JSL disable_pause_window
     LDA INIDISP_STATE
     ORA #$8F
     STA INIDISP_STATE
@@ -213,15 +214,7 @@ check_for_sprite_swap:
     AND #$20
     CMP #$20
     BNE :-
-
-    ; select was hit, swap the value for sprites
-    LDA USE_ARCADE_SPRITE
-    BEQ :+
-    STZ USE_ARCADE_SPRITE
-    BRA :++
-:   LDA #$03
-    STA USE_ARCADE_SPRITE
-:   jsr load_intro_tilesets
+    jsr load_intro_tilesets
     LDA #$0F
     STA INIDISP
 :   rts
@@ -289,24 +282,47 @@ load_intro_tilesets:
     STA INIDISP
     STA INIDISP_STATE
 
-    STZ TILE_CHUNK_COUNT
-    LDA #$01
-    STA TILE_DEST_LB_SETS
-    STA TILE_SRC_LB_BANK
+  LDA #$0E
+  STA CHR_BANK_BANK_TO_LOAD
+  LDA #$00
+  STA CHR_BANK_TARGET_BANK
+  JSL load_chr_table_to_vm
+    
+  LDA #$1F
+  STA CHR_BANK_BANK_TO_LOAD
+  LDA #$01
+  STA CHR_BANK_TARGET_BANK
+  JSL load_chr_table_to_vm
+    
+  LDA #$00
+  STA CHR_BANK_BANK_TO_LOAD
+  LDA #$03
+  STA CHR_BANK_TARGET_BANK
+  JSL load_chr_table_to_vm
 
-    LDA #$10
-    STA TILE_DEST_HB
+  LDA #$01
+  STA CHR_BANK_BANK_TO_LOAD
+  LDA #$04
+  STA CHR_BANK_TARGET_BANK
+  JSL load_chr_table_to_vm
+  
+  LDA #$02
+  STA CHR_BANK_BANK_TO_LOAD
+  LDA #$05
+  STA CHR_BANK_TARGET_BANK
+  JSL load_chr_table_to_vm
+  
+  LDA #$03
+  STA CHR_BANK_BANK_TO_LOAD
+  LDA #$06
+  STA CHR_BANK_TARGET_BANK
+  JSL load_chr_table_to_vm
 
-    LDA #$B0
-    STA TILE_SRC_HB
-    JSL load_tiles
+  LDA #$04
+  STA CHR_BANK_BANK_TO_LOAD
+  STA DATA_CHR_BANK_CURR
+  LDA #$07
+  STA CHR_BANK_TARGET_BANK
+  JSL load_chr_table_to_vm
 
-    STZ TILE_CHUNK_COUNT
-    LDA #$01
-    STA TILE_DEST_LB_SETS
-    STZ TILE_SRC_LB_BANK
-    STZ TILE_DEST_HB
-    LDA #$80
-    STA TILE_SRC_HB
-    JSL load_tiles
     rts

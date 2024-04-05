@@ -41,6 +41,7 @@ c11e_replacement:
   RTL
 
 cnd_c11e_attribute_handle:
+  jsl disable_nmi_no_store
   PHB
   PHA
   PHY
@@ -62,6 +63,8 @@ cnd_c11e_attribute_handle:
   JSL convert_nes_attributes_and_immediately_dma_them
   ; JSL cnd_scroll_no_immidiate
   JSL reset_vmain_to_stored_state 
+  JSL reset_nmi_status
+
   PLX
   PLY
   PLA
@@ -173,13 +176,14 @@ check_and_copy_attribute_buffer:
 ;   BEQ :+
 ;   JSR copy_prepped_attributes2_to_vram
 ; : 
-  LDA COLUMN_1_DMA
-  BEQ :+
-  JSR dma_column_attributes
-: LDA COLUMN_2_DMA
-  BEQ :+
-  JSR dma_column2_attributes
-: RTS
+;   LDA COLUMN_1_DMA
+;   BEQ :+
+;   JSR dma_column_attributes
+; : LDA COLUMN_2_DMA
+;   BEQ :+
+;   JSR dma_column2_attributes
+; : 
+  RTS
 
 
 copy_single_prepped_attribute:
@@ -194,7 +198,7 @@ copy_single_prepped_attribute:
   LDA ATTR_DMA_VMADDH
   STA VMADDH
   LDA ATTR_DMA_VMADDL
-  STA VMDATAL
+  STA VMADDL
 
   LDA ATTR_DMA_SRC_LB
   STA ZP_ADDR_USAGE
@@ -206,18 +210,26 @@ copy_single_prepped_attribute:
 : LDA (ZP_ADDR_USAGE), y
   STA VMDATAH
   INY
-  CMP #$04
+  CPY #$04
   BNE :-
 
   LDA ZP_ADDR_USAGE
   CLC
   ADC #$20
-  BCC :+
-    INC ZP_ADDR_USAGE + 1
-    CLC
-: STA ZP_ADDR_USAGE
+  STA ZP_ADDR_USAGE
 
-  DEX
+  LDA ATTR_DMA_VMADDL
+  CLC
+  ADC #$20
+  STA ATTR_DMA_VMADDL
+  BCC :+
+    INC ATTR_DMA_VMADDH
+: LDA ATTR_DMA_VMADDH
+  STA VMADDH
+  LDA ATTR_DMA_VMADDL
+  STA VMADDL
+
+  DEX  
   BNE :---
 
   jsl reset_vmain_to_stored_state
@@ -237,7 +249,7 @@ copy_prepped_attributes_to_vram:
   LDA ATTR_DMA_SIZE_LB
   BNE :+
   RTS
-: CMP #$01
+: CMP #$10
   BNE :+
   JMP copy_single_prepped_attribute
 
@@ -360,7 +372,7 @@ convert_nes_attributes_and_immediately_dma_them:
   LDA ATTR_WORK_BYTE_3 
   PHA
   JSR check_and_copy_nes_attributes_to_buffer
-  JSR check_and_copy_column_attributes_to_buffer
+  ; JSR check_and_copy_column_attributes_to_buffer
   JSR check_and_copy_attribute_buffer
   pla
   sta ATTR_WORK_BYTE_3
@@ -649,37 +661,6 @@ inf_9720:
   sta ATTR_WORK_BYTE_2
   JMP inf_9497
 
-
-copy_full_screen_attributes:
-  LDX #$00
-  LDY #$00
-  LDA #$C0
-: STA ATTR_NES_VM_ADDR_LB
-  LDA FULL_ATTRIBUTE_COPY_HB
-  STA ATTR_NES_VM_ADDR_HB
-
-  LDA #$20
-  STA ATTR_NES_VM_COUNT
-
-: LDA (FULL_ATTRIBUTE_COPY_SRC_LB), Y
-  STA ATTR_NES_VM_ATTR_START, X
-  INY
-  INX
-  CPX #$20
-  BNE :-
-
-  LDA #$00
-  STA ATTR_NES_VM_ATTR_START, X
-  LDA #$01
-  STA ATTR_NES_HAS_VALUES
-  PHY
-  JSL convert_nes_attributes_and_immediately_dma_them
-  PLY
-  LDA #$E0
-  LDX #$00
-  CPY #$40
-  BNE:--
-  RTS
 
 check_and_copy_column_attributes_to_buffer:
   LDA COL_ATTR_HAS_VALUES

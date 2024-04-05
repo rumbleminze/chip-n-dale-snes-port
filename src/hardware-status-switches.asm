@@ -1,3 +1,26 @@
+.define AUDIO_CODE_LOCATION $8000
+
+sound_hijack_routine:
+  PHP
+  PHB
+  PHK
+  PLB
+  JSR AUDIO_CODE_LOCATION
+  JSL convert_audio
+  PLB
+  PLP
+  RTS
+sound_hijack_routine_end:
+
+write_sound_hijack_routine_to_ram:
+  LDY #$00
+: LDA sound_hijack_routine, y
+  STA SOUND_HIJACK_ROUTINE_START, Y
+  INY
+  CPY #(sound_hijack_routine_end - sound_hijack_routine)
+  BNE :-
+  RTS  
+
 ; 17 bytes of code
 stack_adjustment_routine:
   setAXY16          ; 2

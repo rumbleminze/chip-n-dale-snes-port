@@ -199,6 +199,7 @@ initialize_registers:
   JSR clearvm_to_12
   JSR write_default_palettes
   JSR write_stack_adjustment_routine_to_ram
+  JSR write_sound_hijack_routine_to_ram
   LDA #$A1
   PHA
   PLB 
@@ -435,6 +436,7 @@ dma_values:
   .include "windows.asm"
 
 .segment "PRGA0C"
+
 fixeda0:
 .include "bank7.asm"
 fixeda0_end:

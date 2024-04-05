@@ -96,7 +96,13 @@ nops 8
 
 .byte $A6, $DB, $B5, $DC
 .byte $C9, $88, $F0, $12, $48, $A9, $88, $95, $DC, $E8, $8A, $29, $07, $85, $DB, $68
-.byte $20, $03, $80, $4C, $DC, $C0, $20, $00, $80
+.byte $20, $03, $80, $4C, $DC, $C0
+
+; C0F6 - go do sound
+
+  ; JSR $8000
+  JSR SOUND_HIJACK_ROUTINE_START
+
 
 ; Bank Switch back to $F1
   LDA $F1
@@ -1433,7 +1439,10 @@ nops 4
   LDY #$00
   nops 14
 
-.byte $8C, $10, $40, $8C, $15, $40, $A9
+  STY NES_APU_DMC_TIMER ; DmcFreq_4010
+  STY NES_APU_CHAN_ENABLE ; ApuStatus_4015
+
+.byte $A9
 .byte $40, $8D, $17, $40, $98, $99, $00, $00, $88, $D0, $FA, $E6, $01, $91, $00, $C8
 .byte $D0, $FB, $A6, $01, $E0, $07, $D0, $F3, $A9, $88, $95, $DC, $CA, $10, $FB, $A9
 .byte $1E, $85, $FE, $A9, $06, $20, $53, $FF

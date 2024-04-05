@@ -268,7 +268,7 @@ new_data_bank:
 
 bankswitch_obj_chr_data:
   ; this is a hack that happens to work most of the time.
-  STZ NES_H_SCROLL
+  ; STZ NES_H_SCROLL
 
   PHB
   LDA #$A0

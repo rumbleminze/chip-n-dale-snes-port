@@ -16,7 +16,7 @@ setup_pause_window:
 
     LDA #%00001010
     STA WOBJLOG
-    JSL disable_pause_window
+    jslb disable_pause_window, $a0
     rts
 
 enable_pause_window:

@@ -77,7 +77,7 @@ zero_all_palette:
   DEX
   BNE :-
 
-  RTL
+  RTS
 
 snes_sprite_palatte:
 ; .byte $D6, $10, $FF, $7F, $D6, $10, $00, $00, $91, $29, $CE, $39, $5B, $29, $35, $3A

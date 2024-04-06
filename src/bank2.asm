@@ -96,7 +96,10 @@ brks 52
 .byte $98, $96, $A4, $8C, $98, $A5, $AF, $A4, $95, $9D, $8D, $A5, $AE, $23, $08, $12
 .byte $8C, $8A, $99, $8C, $98, $96, $A4, $9E, $A5, $9C, $A5, $8A, $A5, $AF, $A4, $92
 .byte $97, $8C, $A5, $23, $4A, $0A, $95, $92, $8C, $8E, $97, $9C, $8E, $8D, $A4, $8B
-.byte $A2, $23, $85, $17, $97, $92, $97, $9D, $8E, $97, $8D, $98, $A4, $98, $8F, $A4
+.byte $A2, $23
+; .byte $85
+.byte $65 ; moved up a row due to no overscan
+.byte $17, $97, $92, $97, $9D, $8E, $97, $8D, $98, $A4, $98, $8F, $A4
 .byte $8A, $96, $8E, $9B, $92, $8C, $8A, $A4, $92, $97, $8C, $A5, $23, $CA, $03, $55
 .byte $DD, $77, $55, $23, $D2, $03, $55, $0A, $04, $55, $23, $DA, $03, $55, $58, $50
 .byte $55, $00, $20, $88, $0F, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
@@ -179,7 +182,11 @@ brks 52
 .byte $EB, $22, $BD, $00, $EC, $22, $C2, $00, $EB, $22, $DD, $00, $EC, $22, $E2, $00
 .byte $EB, $22, $FD, $00, $EC, $23, $02, $00, $EB, $23, $1D, $00, $EC, $23, $22, $00
 .byte $EB, $23, $3D, $00, $EC, $23, $42, $00, $EB, $23, $5D, $00, $EC, $23, $62, $00
-.byte $EB, $23, $7D, $00, $EC, $23, $82, $1B, $FD, $FE, $FE, $FE, $FE, $FE, $FE, $FE
+.byte $EB, $23, $7D, $00, $EC
+
+; .byte $23, $82, $1B, $FD, $FE, $FE, $FE, $FE, $FE, $FE, $FE
+; text box bottom
+.byte $23, $62, $1B, $FD, $FE, $FE, $FE, $FE, $FE, $FE, $FE
 
 
 ; 8800 - bank 2
@@ -1182,7 +1189,8 @@ next_tile_set:
     CMP #$02
     BNE :+
     INC ATTR_PARAM_IMMEDIATE
-    JSL cnd_scroll_atrribute_handle
+    jslb cnd_scroll_atrribute_handle, $a0 
+
     STZ ATTR_PARAM_IMMEDIATE
     BRA next_tile_set
 

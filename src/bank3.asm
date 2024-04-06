@@ -14,7 +14,7 @@
 .byte $85, $C0, $A5, $C1, $65, $CD, $90, $08, $A5, $CC, $29, $80, $85, $CC, $A9, $FF
 .byte $85, $CD, $60
 
-; sound
+; sound fx
   TXA
   AND #$03
   EOR #$03
@@ -29,6 +29,7 @@
 : STA SOUND_EMULATOR_BUFFER_START, Y
   RTS
 
+; music?
   PHA
   TXA
   AND #$03

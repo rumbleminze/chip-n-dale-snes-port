@@ -6,7 +6,7 @@ sound_hijack_routine:
   PHK
   PLB
   JSR AUDIO_CODE_LOCATION
-  JSL convert_audio
+  jslb convert_audio, $a0
   PLB
   PLP
   RTS
@@ -101,7 +101,7 @@ set_sp_to_1bf_reload_ppucontrol:
   TXS
   setAXY8
 
-  JSL reset_ppu_control_values
+  jslb reset_ppu_control_values, $a0
 
   LDA STACK_RETURN_DB
   PHA
@@ -115,7 +115,7 @@ update_ppu_control_from_fd_ff:
   LDA BG_SCREEN_INDEX
   AND #$01
   ORA PPU_CONTROL_STATE
-  jsl update_ppu_control_values_from_a
+  jslb update_ppu_control_values_from_a, $a0
   RTL
 
 prg_bank_swap_to_a:
@@ -124,7 +124,7 @@ prg_bank_swap_to_a:
   STY BANK_SWITCH_Y
   STA BANK_SWITCH_A
 
-  JSL disable_nmi_no_store
+  jslb disable_nmi_no_store, $a0
   ; pull the stack values off
   PLX
   PLY
@@ -148,7 +148,7 @@ prg_bank_swap_to_a:
   LDY BANK_SWITCH_Y
   LDX BANK_SWITCH_X
   
-  JSL reset_nmi_status
+  jslb reset_nmi_status, $a0
 
   ; rtl, to the new bank
   RTL
@@ -164,7 +164,7 @@ store_90_to_nmi_and_ppu_control_states:
 
 reset_ppu_control_values:
   LDA PPU_CONTROL_STATE
-  JSL update_ppu_control_values_from_a
+  jslb update_ppu_control_values_from_a, $a0
   RTL
 
 set_ppu_control_and_mask_to_0:
@@ -195,18 +195,18 @@ update_ppu_control_values_from_a:
     AND #$80
     CMP #$80
     BNE :+
-    jsl enable_nmi
+    jslb enable_nmi, $a0
     bra :++
-:   jsl disable_nmi_no_store
+:   jslb disable_nmi_no_store, $a0
 
 :   PLA
     PHA
     AND #$04
     CMP #$04
     BNE :+
-    jsl set_vram_increment_to_32_no_store
+    jslb set_vram_increment_to_32_no_store, $a0
     bra :++
-:   jsl set_vram_increment_to_1
+:   jslb set_vram_increment_to_1, $a0
 
 :   STZ HOFS_HB
     STZ VOFS_HB
@@ -313,14 +313,14 @@ update_ppu_mask_to_00_store:
     LDA #$00
     STA PPU_MASK_STATE
     ; turns on BG and sprites
-    JSL update_values_for_ppu_mask
+    jslb update_values_for_ppu_mask, $a0
     RTL
 
 update_ppu_mask_store_to_1e:
     LDA #$1E
     STA PPU_MASK_STATE
     ; turns on BG and sprites
-    JSL update_values_for_ppu_mask
+    jslb update_values_for_ppu_mask, $a0
     RTL
 
 update_values_for_ppu_mask:
@@ -329,9 +329,9 @@ update_values_for_ppu_mask:
     LDA PPU_MASK_STATE
     AND #$06
     BNE :+
-    JSL enable_pause_window
+    jslb enable_pause_window, $a0
     BRA :++
-:   JSL disable_pause_window
+:   jslb disable_pause_window, $a0
 :   LDA PPU_MASK_STATE
     AND #$10
     CMP #$10
@@ -352,7 +352,7 @@ update_values_for_ppu_mask:
     LDA #$0F
     STA INIDISP
     RTL
-:   JSL force_blank_and_store
+:   jslb force_blank_and_store, $a0
     RTL
 
 enable_nmi_and_store:
@@ -415,8 +415,8 @@ reset_nmi_status:
     RTL
 
 reset_nmi_and_inidisp_status:
-    JSL reset_nmi_status
-    JSL reset_inidisp
+    jslb reset_nmi_status, $a0
+    jslb reset_inidisp, $a0
     RTL
 
 set_vram_increment_to_1:
@@ -456,8 +456,8 @@ set_vram_increment_to_32_no_store:
     RTL
 
 reset_vmain_and_inidisp:
-    JSL reset_vmain_to_stored_state
-    JSL reset_inidisp
+    jslb reset_vmain_to_stored_state, $a0
+    jslb reset_inidisp, $a0
     RTL
 
 reset_vmain_to_stored_state:
@@ -491,6 +491,6 @@ reset_inidisp:
     RTL
 
 disable_nmi_and_fblank_no_store:
-    JSL force_blank_no_store
-    JSL disable_nmi_no_store
+    jslb force_blank_no_store, $a0
+    jslb disable_nmi_no_store, $a0
     RTL

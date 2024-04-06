@@ -261,7 +261,7 @@ new_data_bank:
 
   STZ CHR_BANK_TARGET_BANK
   INC CHR_BANK_TARGET_BANK
-  JSL load_chr_table_to_vm
+  jslb load_chr_table_to_vm, $a0
 
   PLB
   RTL
@@ -296,7 +296,7 @@ new_obj_bank:
   LDA target_obj_banks, Y
   STA CHR_BANK_TARGET_BANK
   PHA
-  jsl load_chr_table_to_vm
+  jslb load_chr_table_to_vm, $a0
 
 ;   LDA CHR_BANK_BANK_TO_LOAD
 ;   CMP #$0C

@@ -41,7 +41,7 @@ c11e_replacement:
   RTL
 
 cnd_c11e_attribute_handle:
-  jsl disable_nmi_no_store
+  jslb disable_nmi_no_store, $a0
   PHB
   PHA
   PHY
@@ -60,10 +60,9 @@ cnd_c11e_attribute_handle:
   STA ATTR_NES_HAS_VALUES
 
   PHX
-  JSL convert_nes_attributes_and_immediately_dma_them
-  ; JSL cnd_scroll_no_immidiate
-  JSL reset_vmain_to_stored_state 
-  JSL reset_nmi_status
+  jslb convert_nes_attributes_and_immediately_dma_them, $a0
+  jslb reset_vmain_to_stored_state, $a0
+  jslb reset_nmi_status, $a0  
 
   PLX
   PLY
@@ -80,15 +79,15 @@ update_indirect_pointer:
 
 cnd_scroll_atrribute_handle:
   
-  JSL cnd_scroll_no_immidiate
+  jslb cnd_scroll_no_immidiate, $a0
   PHA
   PHX
   PHY
   LDA ATTR_PARAM_IMMEDIATE
   BEQ :+
     PHB
-    JSL convert_nes_attributes_and_immediately_dma_them
-    JSL reset_vmain_to_stored_state
+    jslb convert_nes_attributes_and_immediately_dma_them, $a0
+    jslb reset_vmain_to_stored_state, $a0
     PLB
 : 
   PLY
@@ -232,7 +231,7 @@ copy_single_prepped_attribute:
   DEX  
   BNE :---
 
-  jsl reset_vmain_to_stored_state
+  jslb reset_vmain_to_stored_state, $a0
 
   PLA
   STA ZP_ADDR_USAGE + 1

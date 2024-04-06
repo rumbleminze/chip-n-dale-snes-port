@@ -13,7 +13,7 @@
 ;   LDA $FF
 ;   AND #$78
 ;   STA PpuControl_2000
-  jsl disable_nmi_no_store
+  jslb disable_nmi_no_store, $a0
   nops 3
 
   nops 3 ; LDA PpuStatus_2002
@@ -35,7 +35,7 @@ nops 8
 ; c0d1
   nops 3 ; LDA PpuStatus_2002
   ; always palette data
-  JSL write_palette_data
+  jslb write_palette_data, $a0
 
 ;   LDA #$3F
 ;   STA VMADDH ; PpuAddr_2006
@@ -58,7 +58,8 @@ nops 8
 ;   STA BG1VOFS ; PpuScroll_2005
 ;   JSL update_screen_scroll
   
-  JSL set_ppu_mask_to_stored_value
+  jslb set_ppu_mask_to_stored_value, $a0 
+
 ;   LDA $FE
 ;   STA PpuMask_2001
   nops 1
@@ -67,7 +68,7 @@ nops 8
 ;   AND #$01
 ;   ORA $FF
 ;   STA PpuControl_2000
-  jsl update_ppu_control_from_fd_ff
+  jslb update_ppu_control_from_fd_ff, $a0
   nops 5
   
   INC $92
@@ -83,7 +84,7 @@ nops 8
     BNE @skip_switch
 ; Bank Switch to #$03, which is #$A4 for us
     LDA #$03
-    jsl prg_bank_swap_to_a
+    jslb prg_bank_swap_to_a, $a0
     ; PHA
     ; PLB
     ; STA BANK_SWITCH_DB
@@ -106,7 +107,8 @@ nops 8
 
 ; Bank Switch back to $F1
   LDA $F1
-  JSL prg_bank_swap_to_a
+  jslb prg_bank_swap_to_a, $a0 
+
 ;   STA $FFF0
 ;   LSR A
 ;   STA $FFF0
@@ -134,7 +136,8 @@ nops 8
 : LDA $0360,X
   BMI :+
 
-  JSL c11e_replacement
+  jslb c11e_replacement, $a0 
+
   nops 18
 ;   STA VMADDH ; PpuAddr_2006
 ;   LDA $0361,X
@@ -156,7 +159,7 @@ nops 8
 .byte $8D, $00, $20, $60, $A5, $FF, $09, $80, $85, $FF, $8D, $00, $20, $60
 
   INC $F0
-  jsl update_ppu_mask_to_00_store
+  jslb update_ppu_mask_to_00_store, $a0
   nops 3
 ;   LDA #$00
 ;   STA $FE
@@ -164,7 +167,7 @@ nops 8
   RTS
 
   DEC $F0
-  jsl update_ppu_mask_store_to_1e
+  jslb update_ppu_mask_store_to_1e, $a0
   nops 3
 ;   LDA #$1E
 ;   STA $FE
@@ -181,7 +184,7 @@ nops 8
   STA $00
   STX $01
   STY $02
-  jsl clear_bg_jsl
+  jslb clear_bg_jsl, $a0
   nops 65
   rts
 
@@ -295,7 +298,8 @@ nops 8
 ;   TXS
 ;   LDA $FF
 ;   STA PpuControl_2000
-JSL set_sp_to_1bf_reload_ppucontrol
+jslb set_sp_to_1bf_reload_ppucontrol, $a0 
+
 nops 4
 
 .byte $A9, $F0, $20, $77
@@ -1433,7 +1437,8 @@ nops 4
 ;   BMI :-
 ;   DEY
 ;   BNE :--
-  JSL set_ppu_control_and_mask_to_0
+jslb set_ppu_control_and_mask_to_0, $a0 
+
 : LDA RDNMI ; $2002
   BPL :-
   LDY #$00
@@ -1470,7 +1475,7 @@ nops 4
 
 ;   LDA #$90
 ;   STA $FF
-jsl store_90_to_nmi_and_ppu_control_states
+jslb store_90_to_nmi_and_ppu_control_states, $a0
 
 ; fe8d - stack pointer stuff
 ;   LDX #$FF
@@ -1502,7 +1507,8 @@ jsl store_90_to_nmi_and_ppu_control_states
 ;   LDA $82,X
 ;   TAX
 ;   TXS
-JSL set_stack_pointer_to_82_x
+jslb set_stack_pointer_to_82_x, $a0 
+
 LDA $91
 
 
@@ -1525,7 +1531,8 @@ JMP $FE8D
 @bankswitch_lower_4k:
   STA $F2
   STA CHR_BANK_BANK_TO_LOAD
-  JSL bankswitch_obj_chr_data  
+  jslb bankswitch_obj_chr_data, $a0 
+
   nops 12
 ;   STA $BFFF
 ;   LSR A
@@ -1548,7 +1555,8 @@ JMP $FE8D
 : LDA RDNMI
   AND #$80
   BEQ :-
-  JSL check_for_bg_chr_bankswap
+  jslb check_for_bg_chr_bankswap, $a0 
+
   nops 2
 ;   STA $DFFF
 ;   LSR A
@@ -1578,7 +1586,8 @@ JMP $FE8D
 ;   STA $FFF0
 ;   LSR A
 ;   STA $FFF0
-  JSL prg_bank_swap_to_a
+  jslb prg_bank_swap_to_a, $a0 
+
   nops 15
 
   LDA #$00
@@ -1588,7 +1597,8 @@ JMP $FE8D
   RTS
 
 : LDA #$03
-  JSL prg_bank_swap_to_a
+  jslb prg_bank_swap_to_a, $a0 
+
   nops 15 ; should be 15
 
 .byte $A6, $DB, $B5, $DC, $C9, $88

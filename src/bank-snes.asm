@@ -138,7 +138,7 @@ initialize_registers:
 
   JSR zero_oam  
   JSR dma_oam_table
-  JSL zero_all_palette
+  JSR zero_all_palette
 
   STA OBSEL
   LDA #$11
@@ -208,10 +208,12 @@ initialize_registers:
 
   snes_nmi:
     LDA RDNMI 
-    JSL update_values_for_ppu_mask
-    JSL infidelitys_scroll_handling
-    JSL update_screen_scroll
-    JSL setup_hdma    
+    
+    jslb update_values_for_ppu_mask, $a0
+    jslb infidelitys_scroll_handling, $a0
+    jslb update_screen_scroll, $a0 
+    jslb setup_hdma, $a0
+
 
     LDA #$7E
     STA A1B3
@@ -228,8 +230,7 @@ initialize_registers:
     STA HDMAEN
 
     .if ENABLE_MSU > 0
-      ; JSL msu_nmi_check
-      .byte $22, .lobyte(msu_nmi_check), .hibyte(msu_nmi_check), $e8
+      jslb msu_nmi_check, $e8
     .endif 
 
     JSR dma_oam_table
@@ -349,8 +350,7 @@ clearvm_to_12:
   BPL :-
 
   STZ NMITIMEN
-  JSL force_blank_no_store
-   
+  jslb force_blank_no_store, $a0 
   setAXY16
   ldx #$2000
   stx VMADDL 
@@ -365,7 +365,8 @@ clearvm_to_12:
 		BNE :-
   
   setAXY8
-  JSL reset_inidisp
+  jslb reset_inidisp, $a0 
+
   RTS
 
 clear_zp:

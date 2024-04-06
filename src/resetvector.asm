@@ -37,7 +37,7 @@ nmi:
     PHA
     PHX
     PHY
-    JSL snes_nmi
+    jslb snes_nmi, $a0
     
     ; jump to NES NMI
     CLC
@@ -59,7 +59,7 @@ nmi:
 
     JML [BANK_SWITCH_LB]
 return_from_nes_nmi:
-    JSL translate_8by8only_nes_sprites_to_oam
+    jslb translate_8by8only_nes_sprites_to_oam, $a0
     PLY
     PLX
     PLA

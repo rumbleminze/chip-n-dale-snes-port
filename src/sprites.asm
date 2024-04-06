@@ -1,180 +1,180 @@
-translate_8_by_16_sprites:
-  jsl disable_nmi_no_store
-  LDX #$03
-  LDY #$00
-traslation_start:
-  LDA $0200,X
-  STA SNES_OAM_START + 0,Y
-  STA SNES_OAM_START + 4,Y
-  DEX
-  DEX
-  DEX
-  INY
-  LDA $0200,X
-  STA SNES_OAM_START + 0,Y
-  CLC
-  ADC #$08
-  BNE :+
-  LDA #$F8
-: STA SNES_OAM_START + 4,Y
-  INX
-  INY
-  LDA $0200,X
-  PHA
-  AND #$01
-  BEQ :+
-  STA $0AFE
-  PLA
-  DEC
-  BRA :++
-: PLA
-: STA SNES_OAM_START,Y
-  INC
-  STA SNES_OAM_START + 4,Y
-  INX
-  INY
-  LDA $0200,X
-  AND #$80
-  BPL :+
-  DEY
-  LDA SNES_OAM_START + 4,Y
-  STA SNES_OAM_START + 0,Y
-  DEC
-  STA SNES_OAM_START + 4,Y
-  INY
-: LDA $0200,X
-  PHA
-  AND #$0F
-  CLC
-  ADC $0200,X
-  STA $0AFF
-  PLA
-  AND #$C0
-  CLC
-  ADC #$30
-  ORA $0AFF
-  STA $0AFF
-  LDA $0200,X
-  AND #$20
-  BEQ :+
-  LDA $0AFF
-  SEC
-  SBC #$30
-  BRA :++
-: LDA $0AFF
-: STA SNES_OAM_START + 0,Y
-  STA SNES_OAM_START + 4,Y
-  PHA
-  LDA $0AFE
-  BEQ :+
-  PLA
-  CLC
-  ADC $0AFE
-  STA SNES_OAM_START + 0,Y
-  STA SNES_OAM_START + 4,Y
-  STZ $0AFE
-  BRA :++
-: STZ $0AFE
-  PLA
-: INX
-  INX
-  INX
-  INX
-  INX
-  TYA
-  CLC
-  ADC #$05
-  TAY
-  BEQ second_half_of_sprites
-  JMP traslation_start
-  nop
-second_half_of_sprites: 
-  LDA $0200,X
-  STA SNES_OAM_SECOND_BLOCK + 0,Y
-  STA SNES_OAM_SECOND_BLOCK + 4,Y
-  DEX
-  DEX
-  DEX
-  INY
-  LDA $0200,X
-  STA SNES_OAM_SECOND_BLOCK + 0,Y
-  CLC
-  ADC #$08
-  BNE :+
-  LDA #$F8
-: STA SNES_OAM_SECOND_BLOCK + 4,Y
-  INX
-  INY
-  LDA $0200,X
-  PHA
-  AND #$01
-  BEQ :+
-  STA $0AFE
-  PLA
-  DEC
-  BRA :++
-: PLA
-: STA SNES_OAM_SECOND_BLOCK + 0,Y
-  INC
-  STA SNES_OAM_SECOND_BLOCK + 4,Y
-  INX
-  INY
-  LDA $0200,X
-  AND #$80
-  BPL :+
-  DEY
-  LDA SNES_OAM_SECOND_BLOCK + 4,Y
-  STA SNES_OAM_SECOND_BLOCK + 0,Y
-  DEC
-  STA SNES_OAM_SECOND_BLOCK + 4,Y
-  INY
-: LDA $0200,X
-  PHA
-  AND #$0F
-  CLC
-  ADC $0200,X
-  STA $0AFF
-  PLA
-  AND #$C0
-  CLC
-  ADC #$30
-  ORA $0AFF
-  STA $0AFF
-  LDA $0200,X
-  AND #$20
-  BEQ :+
-  LDA $0AFF
-  SEC
-  SBC #$30
-  BRA :++
-: LDA $0AFF
-: STA SNES_OAM_SECOND_BLOCK + 0,Y
-  STA SNES_OAM_SECOND_BLOCK + 4,Y
-  PHA
-  LDA $0AFE
-  BEQ :+
-  PLA
-  CLC
-  ADC $0AFE
-  STA SNES_OAM_SECOND_BLOCK + 0,Y
-  STA SNES_OAM_SECOND_BLOCK + 4,Y
-  STZ $0AFE
-  BRA :++
-: STZ $0AFE
-  PLA
-: INX
-  INX
-  INX
-  INX
-  INX
-  TYA
-  CLC
-  ADC #$05
-  TAY
-  BEQ :+
-  JMP second_half_of_sprites
-: jsl enable_nmi
-  RTL
+; translate_8_by_16_sprites:
+;   jsl disable_nmi_no_store
+;   LDX #$03
+;   LDY #$00
+; traslation_start:
+;   LDA $0200,X
+;   STA SNES_OAM_START + 0,Y
+;   STA SNES_OAM_START + 4,Y
+;   DEX
+;   DEX
+;   DEX
+;   INY
+;   LDA $0200,X
+;   STA SNES_OAM_START + 0,Y
+;   CLC
+;   ADC #$08
+;   BNE :+
+;   LDA #$F8
+; : STA SNES_OAM_START + 4,Y
+;   INX
+;   INY
+;   LDA $0200,X
+;   PHA
+;   AND #$01
+;   BEQ :+
+;   STA $0AFE
+;   PLA
+;   DEC
+;   BRA :++
+; : PLA
+; : STA SNES_OAM_START,Y
+;   INC
+;   STA SNES_OAM_START + 4,Y
+;   INX
+;   INY
+;   LDA $0200,X
+;   AND #$80
+;   BPL :+
+;   DEY
+;   LDA SNES_OAM_START + 4,Y
+;   STA SNES_OAM_START + 0,Y
+;   DEC
+;   STA SNES_OAM_START + 4,Y
+;   INY
+; : LDA $0200,X
+;   PHA
+;   AND #$0F
+;   CLC
+;   ADC $0200,X
+;   STA $0AFF
+;   PLA
+;   AND #$C0
+;   CLC
+;   ADC #$30
+;   ORA $0AFF
+;   STA $0AFF
+;   LDA $0200,X
+;   AND #$20
+;   BEQ :+
+;   LDA $0AFF
+;   SEC
+;   SBC #$30
+;   BRA :++
+; : LDA $0AFF
+; : STA SNES_OAM_START + 0,Y
+;   STA SNES_OAM_START + 4,Y
+;   PHA
+;   LDA $0AFE
+;   BEQ :+
+;   PLA
+;   CLC
+;   ADC $0AFE
+;   STA SNES_OAM_START + 0,Y
+;   STA SNES_OAM_START + 4,Y
+;   STZ $0AFE
+;   BRA :++
+; : STZ $0AFE
+;   PLA
+; : INX
+;   INX
+;   INX
+;   INX
+;   INX
+;   TYA
+;   CLC
+;   ADC #$05
+;   TAY
+;   BEQ second_half_of_sprites
+;   JMP traslation_start
+;   nop
+; second_half_of_sprites: 
+;   LDA $0200,X
+;   STA SNES_OAM_SECOND_BLOCK + 0,Y
+;   STA SNES_OAM_SECOND_BLOCK + 4,Y
+;   DEX
+;   DEX
+;   DEX
+;   INY
+;   LDA $0200,X
+;   STA SNES_OAM_SECOND_BLOCK + 0,Y
+;   CLC
+;   ADC #$08
+;   BNE :+
+;   LDA #$F8
+; : STA SNES_OAM_SECOND_BLOCK + 4,Y
+;   INX
+;   INY
+;   LDA $0200,X
+;   PHA
+;   AND #$01
+;   BEQ :+
+;   STA $0AFE
+;   PLA
+;   DEC
+;   BRA :++
+; : PLA
+; : STA SNES_OAM_SECOND_BLOCK + 0,Y
+;   INC
+;   STA SNES_OAM_SECOND_BLOCK + 4,Y
+;   INX
+;   INY
+;   LDA $0200,X
+;   AND #$80
+;   BPL :+
+;   DEY
+;   LDA SNES_OAM_SECOND_BLOCK + 4,Y
+;   STA SNES_OAM_SECOND_BLOCK + 0,Y
+;   DEC
+;   STA SNES_OAM_SECOND_BLOCK + 4,Y
+;   INY
+; : LDA $0200,X
+;   PHA
+;   AND #$0F
+;   CLC
+;   ADC $0200,X
+;   STA $0AFF
+;   PLA
+;   AND #$C0
+;   CLC
+;   ADC #$30
+;   ORA $0AFF
+;   STA $0AFF
+;   LDA $0200,X
+;   AND #$20
+;   BEQ :+
+;   LDA $0AFF
+;   SEC
+;   SBC #$30
+;   BRA :++
+; : LDA $0AFF
+; : STA SNES_OAM_SECOND_BLOCK + 0,Y
+;   STA SNES_OAM_SECOND_BLOCK + 4,Y
+;   PHA
+;   LDA $0AFE
+;   BEQ :+
+;   PLA
+;   CLC
+;   ADC $0AFE
+;   STA SNES_OAM_SECOND_BLOCK + 0,Y
+;   STA SNES_OAM_SECOND_BLOCK + 4,Y
+;   STZ $0AFE
+;   BRA :++
+; : STZ $0AFE
+;   PLA
+; : INX
+;   INX
+;   INX
+;   INX
+;   INX
+;   TYA
+;   CLC
+;   ADC #$05
+;   TAY
+;   BEQ :+
+;   JMP second_half_of_sprites
+; : jsl enable_nmi
+;   RTL
 
 translate_8by8only_nes_sprites_to_oam:
     ; check if we need to do this

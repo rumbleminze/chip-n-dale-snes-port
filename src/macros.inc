@@ -39,3 +39,7 @@
 .endif
 
 .endmacro
+
+.macro jslb label, bank
+	.byte $22, <label, >label, bank
+.endmacro

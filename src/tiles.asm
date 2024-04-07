@@ -40,6 +40,16 @@ bankswap_table:
 .byte .lobyte(chrom_bank_7_tileset_30), .hibyte(chrom_bank_7_tileset_30), $AF
 .byte .lobyte(chrom_bank_7_tileset_31), .hibyte(chrom_bank_7_tileset_31), $AF
 
+.byte <(basic_intro_tiles), >(basic_intro_tiles), $B0
+
+
+.if SIMPLE_INTRO = 0
+.byte <(msu_intro_tiles_0), >(msu_intro_tiles_0), $B1
+.byte <(msu_intro_tiles_1), >(msu_intro_tiles_1), $B1
+.byte <(msu_intro_tiles_2), >(msu_intro_tiles_2), $B1
+.byte <(msu_intro_tiles_3), >(msu_intro_tiles_3), $B1
+.endif
+
 : RTL
 check_for_chr_bankswap:
 
@@ -436,6 +446,8 @@ target_obj_banks:
 .byte $00 ; 1D - BG Tiles
 .byte $00 ; 1E - BG Tiles
 .byte $00 ; 1F - BG Tiles
-
+.byte $00 ; 20 - intro bg tiles
+.byte $00 ; 21 - fancy intro tiles
+.byte $00 ; 22 - more fancy intro tiles
 
 

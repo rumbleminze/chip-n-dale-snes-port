@@ -32,3 +32,10 @@
 .include "chrom-tiles-5.asm"
 .include "chrom-tiles-6.asm"
 .include "chrom-tiles-7.asm"
+.include "chrom-basic-intro-tiles.asm"
+
+
+.if SIMPLE_INTRO = 0
+    .include "chrom-tiles-msu-intro.asm"
+    .include "msu_video_player.asm"
+.endif

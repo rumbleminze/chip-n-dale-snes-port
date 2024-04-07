@@ -194,12 +194,24 @@ initialize_registers:
   STZ COLUMN_2_DMA
   JSL upload_sound_emulator_to_spc
   ; JSL load_base_tiles
+  ; .if SIMPLE_INTRO > 0
+    JSR do_intro
+  ; .endif
+intro_done:
+  STZ TM      
+  STZ TS      
+  STZ TMW   
+    LDA #$30
+  STA CGWSEL
+  STZ CGADSUB
+  
   JSR setup_pause_window 
-  ; JSR do_intro
+  JSL disable_pause_window
   JSR clearvm_to_12
   JSR write_default_palettes
   JSR write_stack_adjustment_routine_to_ram
   JSR write_sound_hijack_routine_to_ram
+
   LDA #$A1
   PHA
   PLB 
@@ -418,11 +430,29 @@ clear_buffers:
   BNE :-
   RTS
 
+msu_movie_rti:
+  REP #$30
+  PLY
+  PLX
+  PLA
+  SEP #$30
+  PLP
+  RTI
+
+
 
 dma_values:
   .byte $00, $12
   
-  .include "intro_screen.asm"
+  .if SIMPLE_INTRO > 0
+    .include "intro_screen.asm"
+  .endif
+
+  .if SIMPLE_INTRO = 0
+    .include "msu_intro_screen.asm"
+  .endif
+
+
   .include "konamicode.asm"
   .include "palette_updates.asm"
   .include "palette_lookup.asm"

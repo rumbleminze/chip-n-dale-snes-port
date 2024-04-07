@@ -1,38 +1,16 @@
-INTRO_SCREEN_DONE = $082D
-
 intro_screen_data:
-.byte $48, $20, $e2, $00, $69, $71, $70, $6f, $00                       ; (c) 1986 
-.byte $db, $cc, $ca, $d4, $d6, $00                                      ; TECMO
-.byte $ff                                                               ; 
+.byte $e2, $20, $29, $28, $2b, $2d, $1e, $1d, $00                       ; Ported 
+.byte $1b, $32, $00                                                     ; by 
+.byte $2b, $2e, $26, $1b, $25, $1e, $26, $22, $27, $33, $1e, $00        ; Rumbleminze, 
+.byte $12, $10, $12, $14, $ff                                           ; 2024
 
-; .byte $82, $20, $d7, $d9, $cc, $da, $da, $00                            ; press
-; .byte $da, $cc, $d3, $cc, $ca, $db, $00, $db, $d6, $ff                  ; select to
-; .byte $A2, $20, $da, $de, $d0, $db, $ca, $cf, $00                       ; switch
-; .byte $da, $d7, $d9, $d0, $db, $cc, $da, $ff                            ; sprites
+.byte $00, $23, $12, $1a, $10, $13, $00                                 ; 2A03
+.byte $2c, $28, $2e, $27, $1d, $00                                      ; SOUND 
+.byte $1e, $26, $2e, $25, $1a, $2d, $28, $2b, $00                       ; EMULATOR
+.byte $1b, $32, $00                                                     ; BY
+.byte $26, $1e, $26, $1b, $25, $1e, $2b, $2c, $ff                       ; MEMBLERS
 
-; .byte $ae, $21, $d4, $dc, $da, $d0, $ca, $FF
-; .byte $e4, $21, $d6, $d9, $d0, $ce, $d0, $d5, $c8, $d3, $FF
-; .byte $f5, $21, $d4, $da, $dc, $69, $FF
-
-.byte $A3, $22, $d7, $d6, $d9, $db, $cc, $cb, $00                       ; Ported 
-.byte $c9, $e0, $00                                                     ; by 
-.byte $d9, $dc, $d4, $c9, $d3, $cc, $d4, $d0, $d5, $e1, $cc, $00        ; Rumbleminze, 
-.byte $6A, $68, $6a, $6c, $ff                                           ; 2023
-
-.byte $00, $23, $6a, $c8, $68, $6b, $00                                 ; 2A03
-.byte $DA, $D6, $DC, $D5, $CB, $00                                      ; SOUND 
-.byte $CC, $D4, $DC, $D3, $C8, $DB, $D6, $D9, $00                       ; EMULATOR
-.byte $C9, $E0, $00                                                     ; BY
-.byte $d4, $cc, $d4, $c9, $d3, $cc, $d9, $da, $ff                       ; MEMBLERS
-
-; .byte $41, $23, $d4, $da, $dc, $69, $00                                 ; MSU1 TRACKS BY
-; .byte $db, $d9, $c8, $ca, $d2, $da, $00
-; .byte $c9, $e0, $ff                     
-; .byte $61, $23, $dd, $ce, $d4, $dc, $da, $d0, $ca, $00                  ; VG MUSIC REVISITED
-; .byte $d9, $cc, $dd, $d0, $da, $d0, $db, $cc, $cb, $ff
-            
-
-.byte $78, $23, $d9, $cc, $dd, $00, $69, $81, $69, $ff ; Version (REV0)
+.byte $78, $23, $2b, $1e, $2f, $10, $ff ; Version (REV0)
 .byte $ff, $ff
 
 write_intro_palette:
@@ -282,47 +260,53 @@ load_intro_tilesets:
     STA INIDISP
     STA INIDISP_STATE
 
-  LDA #$0E
+  LDA #$20
   STA CHR_BANK_BANK_TO_LOAD
   LDA #$00
   STA CHR_BANK_TARGET_BANK
   JSL load_chr_table_to_vm
-    
-  LDA #$1F
+
+    LDA #$20
   STA CHR_BANK_BANK_TO_LOAD
   LDA #$01
   STA CHR_BANK_TARGET_BANK
   JSL load_chr_table_to_vm
     
-  LDA #$00
-  STA CHR_BANK_BANK_TO_LOAD
-  LDA #$03
-  STA CHR_BANK_TARGET_BANK
-  JSL load_chr_table_to_vm
+;   LDA #$1F
+;   STA CHR_BANK_BANK_TO_LOAD
+;   LDA #$01
+;   STA CHR_BANK_TARGET_BANK
+;   JSL load_chr_table_to_vm
+    
+;   LDA #$00
+;   STA CHR_BANK_BANK_TO_LOAD
+;   LDA #$03
+;   STA CHR_BANK_TARGET_BANK
+;   JSL load_chr_table_to_vm
 
-  LDA #$01
-  STA CHR_BANK_BANK_TO_LOAD
-  LDA #$04
-  STA CHR_BANK_TARGET_BANK
-  JSL load_chr_table_to_vm
+;   LDA #$01
+;   STA CHR_BANK_BANK_TO_LOAD
+;   LDA #$04
+;   STA CHR_BANK_TARGET_BANK
+;   JSL load_chr_table_to_vm
   
-  LDA #$02
-  STA CHR_BANK_BANK_TO_LOAD
-  LDA #$05
-  STA CHR_BANK_TARGET_BANK
-  JSL load_chr_table_to_vm
+;   LDA #$02
+;   STA CHR_BANK_BANK_TO_LOAD
+;   LDA #$05
+;   STA CHR_BANK_TARGET_BANK
+;   JSL load_chr_table_to_vm
   
-  LDA #$03
-  STA CHR_BANK_BANK_TO_LOAD
-  LDA #$06
-  STA CHR_BANK_TARGET_BANK
-  JSL load_chr_table_to_vm
+;   LDA #$03
+;   STA CHR_BANK_BANK_TO_LOAD
+;   LDA #$06
+;   STA CHR_BANK_TARGET_BANK
+;   JSL load_chr_table_to_vm
 
-  LDA #$04
-  STA CHR_BANK_BANK_TO_LOAD
-  STA DATA_CHR_BANK_CURR
-  LDA #$07
-  STA CHR_BANK_TARGET_BANK
-  JSL load_chr_table_to_vm
+;   LDA #$04
+;   STA CHR_BANK_BANK_TO_LOAD
+;   STA DATA_CHR_BANK_CURR
+;   LDA #$07
+;   STA CHR_BANK_TARGET_BANK
+;   JSL load_chr_table_to_vm
 
     rts

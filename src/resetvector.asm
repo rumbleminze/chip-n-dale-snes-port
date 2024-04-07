@@ -66,4 +66,15 @@ return_from_nes_nmi:
     RTI
 
 _rti:
+    JML $C7FF14 
+    LDA $01B0
+    BEQ :+
+    LDA $E6
+    BEQ :+
+    JSR $D000
+:   LDA #$A1
+    PHA
+    PLB
+    BRA start
+
     rti

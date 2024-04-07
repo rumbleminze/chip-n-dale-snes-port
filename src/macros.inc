@@ -43,3 +43,7 @@
 .macro jslb label, bank
 	.byte $22, <label, >label, bank
 .endmacro
+
+.macro jmlb label, bank
+	.byte $5C, <label, >label, bank
+.endmacro

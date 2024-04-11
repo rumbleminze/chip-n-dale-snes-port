@@ -147,9 +147,8 @@ prg_bank_swap_to_a:
   LDA BANK_SWITCH_A
   LDY BANK_SWITCH_Y
   LDX BANK_SWITCH_X
+;   jslb reset_nmi_status, $a0
   
-  jslb reset_nmi_status, $a0
-
   ; rtl, to the new bank
   RTL
 

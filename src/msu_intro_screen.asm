@@ -1,8 +1,24 @@
+intro_screen_text:
+.byte $D2, $41, $29, $28, $2b, $2d, $00                       ; Port
+.byte $1b, $32, $ff                                                     ; by 
+.byte $F2, $41, $2b, $2e, $26, $1b, $25, $1e, $26, $22, $27, $33, $1e, $FF        ; Rumbleminze, 
+.byte $12, $42, $12, $10, $12, $14, $ff                                           ; 2024
+
+.byte $b2, $42, $12, $1a, $10, $13, $00                                 ; 2A03
+.byte $2c, $28, $2e, $27, $1d, $ff                                      ; SOUND 
+.byte $d2, $42, $1e, $26, $2e, $25, $1a, $2d, $28, $2b, $ff                       ; EMULATOR
+.byte $f2, $42, $1b, $32, $00                                                     ; BY
+.byte $26, $1e, $26, $1b, $25, $1e, $2b, $2c, $ff                       ; MEMBLERS
+
+.byte $78, $43, $2b, $1e, $2f, $10, $ff ; Version (REV0)
+.byte $ff, $ff
+
 do_intro:
     JSR setup_intro_bg1
     JSR load_intro_tilesets
     JSR write_intro_palette
     JSR write_intro_tiles
+    JSR write_intro_text
 
     LDA #$0F
     STA INIDISP
@@ -23,8 +39,9 @@ do_intro:
     STA INIDISP_STATE
     STA INIDISP
 
-    JML $C7FF00
-
+    .if ENABLE_MSU = 1
+        JML $C7FF00
+    .endif
     jsr reset_bg_values
   RTS
 setup_intro_bg1:
@@ -43,6 +60,42 @@ reset_bg_values:
     LDA #$11
     STA BG12NBA
     rts
+
+write_intro_text:
+    LDY #$00
+
+next_line:
+    ; get starting address
+    LDA intro_screen_text, Y
+    CMP #$FF
+    BEQ exit_intro_write
+
+    PHA
+    INY    
+    LDA intro_screen_text, Y
+    STA VMADDH
+    PLA
+    STA VMADDL
+    INY
+
+next_tile:
+    LDA intro_screen_text, Y
+    INY
+
+    CMP #$FF
+    BEQ next_line
+    
+    STA VMDATAL
+    ; tiles from bank 3
+    ; pallete 7
+    LDA #$1F
+    STA VMDATAH
+    
+    BRA next_tile
+
+exit_intro_write:
+    RTS
+
 write_intro_tiles:
     
     LDA #$80
@@ -95,19 +148,19 @@ load_intro_tilesets:
   STA CHR_BANK_TARGET_BANK
   JSL load_chr_table_to_vm
 
-    LDA #$22
+  LDA #$22
   STA CHR_BANK_BANK_TO_LOAD
   LDA #$01
   STA CHR_BANK_TARGET_BANK
   JSL load_chr_table_to_vm
 
-      LDA #$23
+  LDA #$23
   STA CHR_BANK_BANK_TO_LOAD
   LDA #$02
   STA CHR_BANK_TARGET_BANK
   JSL load_chr_table_to_vm
 
-      LDA #$24
+  LDA #$20
   STA CHR_BANK_BANK_TO_LOAD
   LDA #$03
   STA CHR_BANK_TARGET_BANK

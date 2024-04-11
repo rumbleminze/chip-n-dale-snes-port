@@ -84,7 +84,9 @@ nops 8
     BNE @skip_switch
 ; Bank Switch to #$03, which is #$A4 for us
     LDA #$03
-    jslb prg_bank_swap_to_a, $a0
+    jslb prg_bank_swap_to_a, $a0    
+
+  jslb reset_nmi_status, $a0
     ; PHA
     ; PLB
     ; STA BANK_SWITCH_DB
@@ -93,22 +95,35 @@ nops 8
     ; LDA #.hibyte(@c0c9_bank_swap)
     ; STA BANK_SWITCH_HB
     ; JML (BANK_SWITCH_LB) 
-    nops 15
+    nops 11
 
-.byte $A6, $DB, $B5, $DC
-.byte $C9, $88, $F0, $12, $48, $A9, $88, $95, $DC, $E8, $8A, $29, $07, $85, $DB, $68
-.byte $20, $03, $80, $4C, $DC, $C0
+; load up songs
+: LDX $DB
+  LDA $DC,X     ; get track id 
+  CMP #$88      ; 88 means do nothing, we're done
+  BEQ :+
+  PHA
+  LDA #$88      ; zero out the track for the next round
+  STA $DC,X
+  INX
+  TXA
+  AND #$07
+  STA $DB
+  PLA
+  JSR $8003
+  JMP :-
 
 ; C0F6 - go do sound
 
   ; JSR $8000
-  JSR SOUND_HIJACK_ROUTINE_START
+: JSR SOUND_HIJACK_ROUTINE_START
 
 
 ; Bank Switch back to $F1
   LDA $F1
   jslb prg_bank_swap_to_a, $a0 
-
+  
+  jslb reset_nmi_status, $a0
 ;   STA $FFF0
 ;   LSR A
 ;   STA $FFF0
@@ -118,7 +133,7 @@ nops 8
 ;   STA $FFF0
 ;   LSR A
 ;   STA $FFF0
-    nops 12
+    nops 8
 
 ; C100 - bank 7
 @skip_switch:
@@ -985,20 +1000,27 @@ nops 4
   STA VMDATAL ; $2007
   LDA #$37
   STA VMDATAL ; $2007
-  LDA $E7EB,Y
-  STA VMADDH ; $2006
-  LDA $E7EC,Y
-  STA VMADDL ; $2006
-  AND #$3F
-  TAX
-  LDA $0780,X
-  AND $E801,Y
-  ORA $E802,Y
-  STA VMDATAL ; $2007
+
+  ; 
+  jslb write_attribute_e784, $a0
+  nops 23
+
+  ; LDA $E7EB,Y
+  ; STA ATTR_NES_VM_ADDR_HB ; VMADDH ; $2006
+  ; LDA $E7EC,Y
+  ; STA ATTR_NES_VM_ADDR_LB ; VMADDL ; $2006
+  ; AND #$3F
+  ; TAX
+  ; LDA $0780,X
+  ; AND $E801,Y
+  ; ORA $E802,Y
+  ; STA VMDATAL ; $2007
+
+
 : INC $00
   LSR $01
   DEC $02
-  BPL :-
+  BPL :--
   RTS
 
 .byte $21, $5A, $22, $5A, $21, $54, $23, $14, $22, $10, $21
@@ -1223,9 +1245,39 @@ nops 4
 .byte $00, $9D, $80, $05, $60, $B9, $D0, $04, $10, $1F, $A9, $01, $85, $00, $BD, $F0
 .byte $04, $38, $F9, $F0, $04, $48, $BD, $00, $05, $F9, $00, $05, $68, $B0, $05, $49
 .byte $FF, $69, $01, $60, $A9, $02, $85, $00, $60, $A9, $FF, $60, $20, $17, $E8, $08
-.byte $A9, $06, $20, $53, $FF, $28, $60, $85, $D9, $86, $00, $A6, $DA, $85, $01, $B5
-.byte $DC, $C9, $88, $D0, $0A, $A5, $01, $95, $DC, $E8, $8A, $29, $07, $85, $DA, $A6
-.byte $00, $60, $A5, $F1, $48, $E6, $9A, $20, $1E, $C2, $A9, $05, $20, $53, $FF, $20
+.byte $A9, $06, $20, $53, $FF, $28, $60
+
+  STA $D9
+  ; play audio track
+  ; STX $00
+  ; LDX $DA  
+  .if ENABLE_MSU = 1
+    jslb msu_check, $b2
+    CMP #$FF
+    BEQ :+
+  .endif
+
+  .if ENABLE_MSU = 0
+      STX $00
+      LDX $DA
+      STA $01
+      LDA $DC,X
+  .endif
+
+  CMP #$88
+  BNE :+
+  LDA $01   
+  STA $DC,X
+  INX
+  TXA
+  AND #$07
+  STA $DA
+: LDX $00
+  RTS
+
+
+
+.byte $A5, $F1, $48, $E6, $9A, $20, $1E, $C2, $A9, $05, $20, $53, $FF, $20
 .byte $00, $80, $A9, $00, $85, $9A, $20, $04, $FF, $68, $4C, $53, $FF, $A5, $F1, $48
 .byte $A9, $08, $85, $2F, $20, $FD, $DA, $68, $4C, $53, $FF, $A5, $F1, $48, $A9, $04
 .byte $85, $2F, $20, $AF, $DA, $68, $4C, $53, $FF, $A5, $F1, $48, $20, $74, $C2, $20
@@ -1587,8 +1639,9 @@ JMP $FE8D
 ;   LSR A
 ;   STA $FFF0
   jslb prg_bank_swap_to_a, $a0 
-
-  nops 15
+  
+  jslb reset_nmi_status, $a0
+  nops 11
 
   LDA #$00
   STA $F5
@@ -1597,9 +1650,9 @@ JMP $FE8D
   RTS
 
 : LDA #$03
-  jslb prg_bank_swap_to_a, $a0 
-
-  nops 15 ; should be 15
+  jslb prg_bank_swap_to_a, $a0   
+  jslb reset_nmi_status, $a0
+  nops 11 ; should be 11
 
 .byte $A6, $DB, $B5, $DC, $C9, $88
 .byte $F0, $12, $48, $A9, $88, $95, $DC, $E8, $8A, $29, $07, $85, $DB, $68, $20, $03

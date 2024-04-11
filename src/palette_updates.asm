@@ -54,7 +54,7 @@ skip_writing_four_empties:
   CPY #$20
   BNE palette_entry
 
-  LDA $B6
+  LDA ACTIVE_NES_BANK
   INC A
   ORA #$A0
   PHA

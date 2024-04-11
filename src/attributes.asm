@@ -1055,3 +1055,46 @@ write_one_off_vrams:
 
 : STZ EXTRA_VRAM_UPDATE
   RTS
+
+
+
+write_attribute_e784:
+  jslb disable_nmi_no_store, $a0
+  PHB
+
+  LDA $E7EB,Y
+  STA ATTR_NES_VM_ADDR_HB ; VMADDH ; $2006
+  LDA $E7EC,Y
+  STA ATTR_NES_VM_ADDR_LB ; VMADDL ; $2006
+  AND #$3F
+  TAX
+  LDA $0780,X
+  AND $E801,Y
+  ORA $E802,Y
+  STA ATTR_NES_VM_ATTR_START ; VMDATAL ; $2007
+  LDA #$01
+  STA ATTR_NES_SIZE
+  STA ATTR_NES_HAS_VALUES
+
+  jslb convert_nes_attributes_and_immediately_dma_them, $a0
+  jslb reset_vmain_to_stored_state, $a0
+  jslb reset_nmi_status, $a0  
+
+  PLB
+  RTL
+
+
+; copies of data in bank 7 that we need as lookup
+; starts at e7d5
+.byte $21, $5A, $22, $5A, $21, $54, $23, $14, $22, $10, $21
+.byte $4A, $22, $0A, $22, $44, $22, $0A, $22, $12, $22, $1A
+e7eb_copy:
+.byte $23, $D6, $23, $E6, $23
+.byte $D5, $23, $F5, $23, $E4, $23, $D2, $23, $E2, $23, $E1, $23, $E2, $23, $E4, $23
+
+
+; E800 - bank 7
+.byte $E6
+e801_copy:
+.byte $3F, $C0, $3F, $C0, $CF, $30, $FC, $03, $FC, $03, $3F, $C0, $F3, $0C, $CF
+.byte $30, $F3, $0C, $F3, $0C, $F3, $0C

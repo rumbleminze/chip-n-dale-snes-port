@@ -35,7 +35,10 @@
 .include "chrom-basic-intro-tiles.asm"
 
 
-.if SIMPLE_INTRO = 0
+.if ENABLE_MSU = 1
+    .include "msu.asm"
+.endif
     .include "chrom-tiles-msu-intro.asm"
+.if ENABLE_MSU = 1
     .include "msu_video_player.asm"
 .endif

@@ -193,10 +193,8 @@ initialize_registers:
   STZ COLUMN_1_DMA
   STZ COLUMN_2_DMA
   JSL upload_sound_emulator_to_spc
-  ; JSL load_base_tiles
-  ; .if SIMPLE_INTRO > 0
-    JSR do_intro
-  ; .endif
+  JSR do_intro
+
 intro_done:
   STZ TM      
   STZ TS      
@@ -241,9 +239,9 @@ intro_done:
     LDA #%00001000
     STA HDMAEN
 
-    .if ENABLE_MSU > 0
-      jslb msu_nmi_check, $e8
-    .endif 
+    ; .if ENABLE_MSU > 0
+      ; jslb msu_nmi_check, $b2
+    ; .endif 
 
     JSR dma_oam_table
     ; JSR disable_attribute_buffer_copy
@@ -443,16 +441,8 @@ msu_movie_rti:
 
 dma_values:
   .byte $00, $12
-  
-  .if SIMPLE_INTRO > 0
-    .include "intro_screen.asm"
-  .endif
 
-  .if SIMPLE_INTRO = 0
-    .include "msu_intro_screen.asm"
-  .endif
-
-
+  .include "msu_intro_screen.asm"
   .include "konamicode.asm"
   .include "palette_updates.asm"
   .include "palette_lookup.asm"
@@ -461,7 +451,6 @@ dma_values:
   .include "hardware-status-switches.asm"
   .include "scrolling.asm"
   .include "attributes.asm"
-  ; .include "attributes2.asm"
   .include "hdma_scroll_lookups.asm"
   .include "2a03_conversion.asm"
   .include "windows.asm"

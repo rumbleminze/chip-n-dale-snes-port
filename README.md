@@ -1,4 +1,4 @@
-# Super Super Dodgeball
+# Chip n Dale: Rescue Rangers
 A native SNES port of the NES game Chip n Dale Rescue Ranges.
 
 # Building

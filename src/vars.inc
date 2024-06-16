@@ -1,6 +1,7 @@
 ; set to 1 to enable debug cheats
 .define DEBUG_MOD 0
-.define ENABLE_MSU 0
+.define ENABLE_MSU 1
+.define ENABLE_MSU_MOVIE 1
 
 NES_V_SCROLL        = $FA   ; might be swapped with H
 NES_H_SCROLL        = $FC   ; 

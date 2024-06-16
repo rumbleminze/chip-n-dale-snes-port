@@ -291,6 +291,10 @@ handle_full:
   BPL :-
   LDA #$FF
   STA ATTRIBUTE_DMA + 1
+
+  LDA VMAIN_STATE
+  STA VMAIN
+
   RTS
 
 copy_partial_prepped_attributes_to_vram:
@@ -595,6 +599,9 @@ inf_952D:
   STZ ATTR_NES_HAS_VALUES
   LDA #$FF
   STA ATTRIBUTE_DMA
+  LDA VMAIN_STATE
+  STA VMAIN
+
   RTS
 
 inf_95b9:

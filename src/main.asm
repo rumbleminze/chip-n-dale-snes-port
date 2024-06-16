@@ -11,7 +11,8 @@
 .segment "CODE"
 .include "resetvector.asm"
 
-.segment "EMPTY_SPACE"
+.segment "RO_SPACE"
+.include "intro_tiles_8bpp.asm"
 .include "2a03_emulator_first_8000.asm"
 .include "2a03_emulator_second_8000.asm"
 

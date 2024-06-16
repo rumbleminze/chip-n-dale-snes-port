@@ -23,6 +23,9 @@ code_values:
 .byte B_BUTTON, A_BUTTON
 .byte $FF
 
+check_for_code_input_long:
+  jsr check_for_code_input
+  rtl
 
 check_for_code_input:
 PHA

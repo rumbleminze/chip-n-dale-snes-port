@@ -193,7 +193,13 @@ initialize_registers:
   STZ COLUMN_1_DMA
   STZ COLUMN_2_DMA
   JSL upload_sound_emulator_to_spc
-  JSR do_intro
+  .if ENABLE_MSU = 1
+    jslb check_for_all_tracks_present, $b2
+    jslb do_intro, $b2
+  .endif
+  .if ENABLE_MSU = 0
+    JSR do_intro
+  .endif
 
 intro_done:
   STZ TM      
@@ -218,7 +224,9 @@ intro_done:
 
   snes_nmi:
     LDA RDNMI 
-    
+    .if ENABLE_MSU = 1
+      jslb msu_nmi_check, $b2
+    .endif
     jslb update_values_for_ppu_mask, $a0
     jslb infidelitys_scroll_handling, $a0
     jslb update_screen_scroll, $a0 
@@ -239,33 +247,7 @@ intro_done:
     LDA #%00001000
     STA HDMAEN
 
-    ; .if ENABLE_MSU > 0
-      ; jslb msu_nmi_check, $b2
-    ; .endif 
-
     JSR dma_oam_table
-    ; JSR disable_attribute_buffer_copy
-    
-    ; LDA ATTR_WORK_BYTE_0
-    ; PHA
-    ; LDA ATTR_WORK_BYTE_1
-    ; PHA
-    ; LDA ATTR_WORK_BYTE_2
-    ; PHA
-    ; LDA ATTR_WORK_BYTE_3 
-    ; PHA
-    ; JSR check_and_copy_attribute_buffer
-    ; JSR check_and_copy_column_attributes_to_buffer
-    ; JSR write_one_off_vrams
-    ; JSR check_and_copy_nes_attributes_to_buffer
-    ; pla
-    ; sta ATTR_WORK_BYTE_3
-    ; pla
-    ; sta ATTR_WORK_BYTE_2
-    ; pla
-    ; sta ATTR_WORK_BYTE_1
-    ; pla 
-    ; sta ATTR_WORK_BYTE_0
     RTL
 
 clear_bg_jsl:
@@ -442,7 +424,6 @@ msu_movie_rti:
 dma_values:
   .byte $00, $12
 
-  .include "msu_intro_screen.asm"
   .include "konamicode.asm"
   .include "palette_updates.asm"
   .include "palette_lookup.asm"
@@ -454,6 +435,10 @@ dma_values:
   .include "hdma_scroll_lookups.asm"
   .include "2a03_conversion.asm"
   .include "windows.asm"
+
+.if ENABLE_MSU = 0
+  .include "intro_screen.asm"
+.endif
 
 .segment "PRGA0C"
 

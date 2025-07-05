@@ -404,8 +404,8 @@ clear_buffers:
   STA $1F00, Y
 
   LDA #$FF
-  STA $6500, y
-  STA $6600, y
+  STA $1500, y
+  STA $1600, y
   DEY
   BNE :-
   RTS

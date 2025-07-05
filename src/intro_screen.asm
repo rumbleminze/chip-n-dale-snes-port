@@ -1,16 +1,19 @@
 intro_screen_data:
-.byte $e2, $20, $29, $28, $2b, $2d, $1e, $1d, $00                       ; Ported 
-.byte $1b, $32, $00                                                     ; by 
-.byte $2b, $2e, $26, $1b, $25, $1e, $26, $22, $27, $33, $1e, $00        ; Rumbleminze, 
-.byte $12, $10, $12, $14, $ff                                           ; 2024
 
-.byte $00, $23, $12, $1a, $10, $13, $00                                 ; 2A03
-.byte $2c, $28, $2e, $27, $1d, $00                                      ; SOUND 
-.byte $1e, $26, $2e, $25, $1a, $2d, $28, $2b, $00                       ; EMULATOR
-.byte $1b, $32, $00                                                     ; BY
-.byte $26, $1e, $26, $1b, $25, $1e, $2b, $2c, $ff                       ; MEMBLERS
 
-.byte $78, $23, $2b, $1e, $2f, $10, $ff ; Version (REV0)
+
+.byte $e2, $20, $43, $41, $47, $4b, $2d, $2b, $00                       ; Ported 
+.byte $27, $55, $00                                                 ; by 
+.byte $47, $4d, $3d, $27, $3b, $2d, $3d, $35, $3f, $57, $2d, $00       ; Rumbleminze, 
+.byte $15, $11, $15, $19, $ff                                         ; 2024
+
+.byte $00, $23, $15, $25, $11, $17, $00                 ; 2A03
+.byte $49, $41, $4d, $3f, $2b, $00                 ; SOUND 
+.byte $2d, $3d, $4d, $3b, $25, $4b, $41, $47, $00                 ; EMULATOR
+.byte $27, $55, $00                 ; BY
+.byte $3d, $2d, $3d, $27, $3b, $2d, $47, $49, $ff                 ; MEMBLERS
+
+.byte $78, $23, $47, $2d, $4f, $13, $ff ; Version (REV0)
 .byte $ff, $ff
 
 write_intro_palette:
